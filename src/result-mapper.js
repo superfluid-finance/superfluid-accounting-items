@@ -39,7 +39,7 @@ function calculateDailyAmounts(startMoment, endMoment, flowRate) {
   const nextDayStart = startMoment.clone().add(1, "days").startOf("day");
   const spansDays = endMoment.isAfter(nextDayStart);
 
-  const firstDailyAmount = getFirstDailyAmount(
+  const firstDailyAmount = calculateFirstDailyAmount(
     initialStartTime.clone(),
     endMoment.clone(),
     spansDays,
@@ -60,7 +60,7 @@ function calculateDailyAmounts(startMoment, endMoment, flowRate) {
     flowRate
   );
 
-  const lastDailyAmount = getLastDailyAmount(
+  const lastDailyAmount = calculateLastDailyAmount(
     nextStartTime,
     endMoment,
     flowRate
@@ -70,7 +70,12 @@ function calculateDailyAmounts(startMoment, endMoment, flowRate) {
   return dailyAmounts;
 }
 
-function getFirstDailyAmount(startMoment, endMoment, spansDays, flowRate) {
+function calculateFirstDailyAmount(
+  startMoment,
+  endMoment,
+  spansDays,
+  flowRate
+) {
   // If stream period spans for days the stop time for a given daily amount
   // is the start of next day, otherwise the end of streamperiod
   const firstEndTime = spansDays
@@ -84,7 +89,7 @@ function getFirstDailyAmount(startMoment, endMoment, spansDays, flowRate) {
   return createDailyAmount(startMoment, firstEndTime, firstTokenQuantity);
 }
 
-function getLastDailyAmount(lastStartTime, endMoment, flowRate) {
+function calculateLastDailyAmount(lastStartTime, endMoment, flowRate) {
   const quantityInToken = getFlowedTokenQuantityBetween(
     lastStartTime,
     endMoment,
