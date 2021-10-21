@@ -1,0 +1,12 @@
+[
+  {
+    "to": "0x123",
+    "from": "0xlookingForAddress",
+    "totalStreamed": "100",
+    "flowRate": 1,
+    "streamStartTime": 1628411351,
+    "streamStopTime": 1628511351,
+    "streamOpeningTxHash": "random1",
+    "streamClosingTxHash": "random2"
+  }
+]
