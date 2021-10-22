@@ -18,11 +18,13 @@ function getPeriodsWithDailyAmounts(streamPeriodsResponse) {
 	const streamPeriods = [
 		...streamPeriodsResponse.data.inflowingStreamPeriods,
 		...streamPeriodsResponse.data.outflowingStreamPeriods,
+		...streamPeriodsResponse.data.inflowingActiveStreamPeriods,
+		...streamPeriodsResponse.data.outflowingActiveStreamPeriods,
 	];
 	return streamPeriods
-		.map((s) => ({ ...s, dailyAmounts: getDailyAmounts(s) }))
 		.map((s) => flattenSenderAndReceiver(s))
-		.map((s) => flattenStartEndEventTransactions(s));
+		.map((s) => flattenStartEndEventTransactions(s))
+		.map((s) => ({ ...s, dailyAmounts: getDailyAmounts(s) }));
 }
 
 function flattenSenderAndReceiver(streamPeriod) {

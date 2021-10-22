@@ -28,6 +28,16 @@ const query = gql`
 		) {
 			...periodFields
 		}
+		inflowingActiveStreamPeriods: streamPeriods(
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, receiver: $accountAddress }
+		) {
+			...periodFields
+		}
+		outflowingActiveStreamPeriods: streamPeriods(
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, sender: $accountAddress }
+		) {
+			...periodFields
+		}
 	}
 
 	fragment periodFields on StreamPeriod {
