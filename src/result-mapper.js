@@ -20,9 +20,9 @@ function getPeriodsWithDailyAmounts(streamPeriodsResponse) {
 		...streamPeriodsResponse.data.outflowingStreamPeriods,
 	];
 	return streamPeriods
+		.map((s) => ({ ...s, dailyAmounts: getDailyAmounts(s) }))
 		.map((s) => flattenSenderAndReceiver(s))
-		.map((s) => flattenStartEndEventTransactions(s))
-		.map((s) => ({ ...s, dailyAmounts: getDailyAmounts(s) }));
+		.map((s) => flattenStartEndEventTransactions(s));
 }
 
 function flattenSenderAndReceiver(streamPeriod) {
@@ -144,4 +144,4 @@ function getFlowedTokenQuantityBetween(startTime, endTime, flowRate) {
 	return endTime.diff(startTime, 'seconds') * flowRate;
 }
 
-module.exports = getAccountingItems;
+module.exports = { getAccountingItems, getDailyAmounts };
