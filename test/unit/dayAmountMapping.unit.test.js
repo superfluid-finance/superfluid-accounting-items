@@ -1,7 +1,3 @@
-const periodSpanningDays_terminated = require('./mockResponses/streamPeriod_spanning3Days_terminated.json');
-const periodWithinDay_terminated = require('./mockResponses/streamPeriod_withinDay_terminated.json');
-const periodSpanning1Day_terminated = require('./mockResponses/streamPeriod_spanning1Day_terminated.json');
-
 const assert = require('assert');
 const { getDailyAmounts } = require('../../src/result-mapper');
 
