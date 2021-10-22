@@ -1,48 +1,61 @@
-const { ApolloClient, InMemoryCache, gql } = require("@apollo/client/core");
-const { createHttpLink } = require("apollo-link-http");
-const fetch = require("cross-fetch");
+const { gql } = require('@apollo/client/core');
+const { getClientForNetwork } = require('./helper');
 
-const client = new ApolloClient({
-  link: createHttpLink({
-    uri:
-      "https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-dev-matic",
-    fetch,
-  }),
-  cache: new InMemoryCache(),
-});
-
-async function queryStreamPeriods() {
-  const result = await client.query({
-    query: gql`
-      query FlowUpdatedEvents($accountId: ID) {
-        {
-            account(id: "0xafad93492b75cdfb3e685c09966aa8ee6ad872c4") {
-              id
-              inflows {
-                ...streamFields
-              }
-              outflows {
-                ...streamFields
-              }
-            }
-          }
-          
-          fragment streamFields on Stream {
-                createdAtTimestamp
-                updatedAtTimestamp
-                
-                flowUpdatedEvents {
-                  token
-                  sender
-                  receiver
-                  flowRate
-                }
-          }
-      }
-    `,
-  });
-  console.log(result);
-  return result;
+async function queryStreamPeriods(from, to, accountAddress, network) {
+	const client = getClientForNetwork(network);
+	const result = await client.query({
+		variables: {
+			from,
+			to,
+			accountAddress,
+		},
+		query,
+	});
+	return result;
 }
 
 module.exports = { queryStreamPeriods };
+
+const query = gql`
+	query GetStreamPeriodsForAddressWithin($from: BigInt!, $to: BigInt!, $accountAddress: String!) {
+		inflowingStreamPeriods: streamPeriods(
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, receiver: $accountAddress }
+		) {
+			...periodFields
+		}
+		outflowingStreamPeriods: streamPeriods(
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, sender: $accountAddress }
+		) {
+			...periodFields
+		}
+	}
+
+	fragment periodFields on StreamPeriod {
+		flowRate
+		token {
+			symbol
+			name
+			superTokenAddress: id
+			underlyingAddress
+		}
+		sender {
+			id
+		}
+		receiver {
+			id
+		}
+		startedAtTimestamp
+		startedAtBlockNumber
+		startedAtEvent {
+			transactionHash
+		}
+
+		stoppedAtTimestamp
+		stoppedAtBlockNumber
+		stoppedAtEvent {
+			transactionHash
+		}
+
+		totalAmountStreamed
+	}
+`;
