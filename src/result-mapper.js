@@ -4,17 +4,13 @@ const { validateInputs } = require('./helper');
 
 async function getAccountingItems(address, network, startTimestamp, endTimestamp) {
 	validateInputs(address, network);
-
-	const streamPeriodsResponse = await queryStreamPeriods(
-		startTimestamp || 0,
-		endTimestamp || moment().unix(),
-		address,
-		network,
-	);
-	return getPeriodsWithDailyAmounts(streamPeriodsResponse);
+	startTimestamp = startTimestamp || 0;
+	endTimestamp = endTimestamp || moment().unix();
+	const streamPeriodsResponse = await queryStreamPeriods(startTimestamp, endTimestamp, address, network);
+	return getPeriodsWithDailyAmounts(streamPeriodsResponse, startTimestamp, endTimestamp);
 }
 
-function getPeriodsWithDailyAmounts(streamPeriodsResponse) {
+function getPeriodsWithDailyAmounts(streamPeriodsResponse, startTimestamp, endTimestamp) {
 	const streamPeriods = [
 		...streamPeriodsResponse.data.inflowingStreamPeriods,
 		...streamPeriodsResponse.data.outflowingStreamPeriods,
@@ -24,7 +20,7 @@ function getPeriodsWithDailyAmounts(streamPeriodsResponse) {
 	return streamPeriods
 		.map((s) => flattenSenderAndReceiver(s))
 		.map((s) => flattenStartEndEventTransactions(s))
-		.map((s) => ({ ...s, dailyAmounts: getDailyAmounts(s) }));
+		.map((s) => ({ ...s, dailyAmounts: getDailyAmounts(s, startTimestamp, endTimestamp) }));
 }
 
 function flattenSenderAndReceiver(streamPeriod) {
@@ -45,11 +41,15 @@ function flattenStartEndEventTransactions(streamPeriod) {
 	return streamPeriodWithoutEvents;
 }
 
-function getDailyAmounts(streamPeriod) {
+function getDailyAmounts(streamPeriod, startTimestamp, endTimestamp) {
 	const isStreamTerminated = !!streamPeriod.stoppedAtTimestamp;
+	const dailyAmountStartTimestamp = Math.max(streamPeriod.startedAtTimestamp, startTimestamp);
+	const dailyAmountEndTimestamp = isStreamTerminated
+		? Math.min(endTimestamp, streamPeriod.stoppedAtTimestamp)
+		: endTimestamp;
 
-	const startMoment = moment.unix(Number(streamPeriod.startedAtTimestamp)).utc();
-	const endMoment = isStreamTerminated ? moment.unix(Number(streamPeriod.stoppedAtTimestamp)).utc() : moment().utc();
+	const startMoment = moment.unix(Number(dailyAmountStartTimestamp)).utc();
+	const endMoment = moment.unix(Number(dailyAmountEndTimestamp)).utc();
 
 	const dailyAmounts = calculateDailyAmounts(startMoment, endMoment, Number(streamPeriod.flowRate));
 

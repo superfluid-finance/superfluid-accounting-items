@@ -18,7 +18,7 @@ function dayAmountMappingTests() {
 
 		// when
 		// given the streamperiod span of 3 days it should account for 2 partial days and 1 full day
-		const dailyAmounts = getDailyAmounts(streamPeriodSpanningDays);
+		const dailyAmounts = getDailyAmounts(streamPeriodSpanningDays, startedAtTimestamp, stoppedAtTimestamp);
 
 		// then
 		// with a flowRate of 1 the combined amount should be exactly as much as the time difference in seconds
@@ -54,7 +54,7 @@ function dayAmountMappingTests() {
 
 		// when
 		// given the streamperiod span of 3 days it should account for 2 partial days and 1 full day
-		const dailyAmounts = getDailyAmounts(streamPeriodSpanningDays);
+		const dailyAmounts = getDailyAmounts(streamPeriodSpanningDays, startedAtTimestamp, stoppedAtTimestamp);
 
 		// then
 		// with a flowRate of 1 the combined amount should be exactly as much as the time difference in seconds
@@ -87,7 +87,7 @@ function dayAmountMappingTests() {
 
 		// when
 		// given the streamperiod span of 3 days it should account for 2 partial days and 1 full day
-		const dailyAmounts = getDailyAmounts(streamPeriodSpanningDays);
+		const dailyAmounts = getDailyAmounts(streamPeriodSpanningDays, startedAtTimestamp, stoppedAtTimestamp);
 
 		// then
 		// with a flowRate of 1 the combined amount should be exactly as much as the time difference in seconds
@@ -97,7 +97,7 @@ function dayAmountMappingTests() {
 			streamedAmount,
 			dailyAmounts.reduce((previousValue, dailyAmount) => previousValue + dailyAmount.quantityInToken, 0),
 		);
-    		// Assert start/end timestamps
+		// Assert start/end timestamps
 		assert.strictEqual(dailyAmounts[0].startTime, startedAtTimestamp);
 		assert.strictEqual(dailyAmounts[0].endTime, stoppedAtTimestamp);
 	});
