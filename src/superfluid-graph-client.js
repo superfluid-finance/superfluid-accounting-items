@@ -7,7 +7,7 @@ async function queryStreamPeriods(from, to, accountAddress, network) {
 		variables: {
 			from,
 			to,
-			accountAddress,
+			accountAddress: accountAddress.toLowerCase(),
 		},
 		query,
 	});
