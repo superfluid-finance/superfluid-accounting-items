@@ -67,3 +67,6 @@ typings/
 .project
 .DS_Store
 .dockerignore
+
+# Local Netlify folder
+.netlify
