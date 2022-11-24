@@ -10,7 +10,7 @@ export interface AccountingRequest extends Event {
 		address: Address;
 		start: number;
 		end: number;
-		priceGranularity: UnitOfTime;
+		priceGranularity: number;
 		virtualization: number;
 		currency: CurrencyCode;
 		receivers: string;
@@ -34,6 +34,8 @@ export const handler = async (event: AccountingRequest) => {
 			Number(end),
 			Number(virtualization) as UnitOfTime,
 			counterpartyAddresses,
+			currency as CurrencyCode,
+			Number(priceGranularity) as UnitOfTime,
 		);
 
 		return {

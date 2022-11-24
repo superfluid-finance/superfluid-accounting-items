@@ -16,17 +16,32 @@ export async function queryStreamPeriods(
 	startTimestamp: number,
 	endTimestamp: number,
 	counterpartyAddresses: Address[],
-): Promise<ApolloQueryResult<StreamPeriodsResults>> {
+): Promise<StreamPeriodResult[]> {
 	const client = getSubgraphClient(network);
-	return client.query({
-		variables: {
-			from: startTimestamp,
-			to: endTimestamp,
-			accountAddress: address.toLowerCase(),
-			counterpartyAddresses: counterpartyAddresses.map((address) => address.toLowerCase()),
-		},
-		query: streamPeriodsQuery,
-	});
+	return client
+		.query({
+			variables: {
+				from: startTimestamp,
+				to: endTimestamp,
+				accountAddress: address.toLowerCase(),
+				counterpartyAddresses: counterpartyAddresses.map((address) => address.toLowerCase()),
+			},
+			query: streamPeriodsQuery,
+		})
+		.then((response: ApolloQueryResult<StreamPeriodsResults>) => {
+			return [
+				...response.data.inflowingStreamPeriods,
+				...response.data.outflowingStreamPeriods,
+				...response.data.inflowingActiveStreamPeriods,
+				...response.data.outflowingActiveStreamPeriods,
+			].map((streamPeriod) => ({
+				...streamPeriod,
+				chainId: network.id,
+			}));
+		})
+		.catch((e) => {
+			throw e;
+		});
 }
 
 function getSubgraphClient(network: Network) {

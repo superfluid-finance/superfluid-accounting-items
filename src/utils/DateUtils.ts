@@ -1,4 +1,15 @@
-import { endOfDay, endOfMonth, endOfWeek, endOfYear, fromUnixTime, getUnixTime } from 'date-fns';
+import {
+	endOfDay,
+	endOfMonth,
+	endOfWeek,
+	endOfYear,
+	fromUnixTime,
+	getUnixTime,
+	startOfDay,
+	startOfMonth,
+	startOfWeek,
+	startOfYear,
+} from 'date-fns';
 
 /**
  * Enum numerical value is expressed in seconds.
@@ -14,12 +25,18 @@ export enum UnitOfTime {
 	Year = 31536000,
 }
 
+export const Interval = {
+	[UnitOfTime.Day]: 'daily',
+	[UnitOfTime.Week]: 'weekly',
+	[UnitOfTime.Month]: 'monthly',
+};
+
 export function getEndOfPeriodTimestamp(timestamp: number, period: UnitOfTime) {
 	const date = fromUnixTime(timestamp);
 	return getUnixTime(getEndOfPeriod(date, period));
 }
 
-function getEndOfPeriod(date: Date, period: UnitOfTime) {
+export function getEndOfPeriod(date: Date, period: UnitOfTime) {
 	switch (period) {
 		case UnitOfTime.Day:
 			return endOfDay(date);
@@ -29,6 +46,21 @@ function getEndOfPeriod(date: Date, period: UnitOfTime) {
 			return endOfMonth(date);
 		case UnitOfTime.Year:
 			return endOfYear(date);
+		default:
+			return date;
+	}
+}
+
+export function getStartOfPeriod(date: Date, period: UnitOfTime) {
+	switch (period) {
+		case UnitOfTime.Day:
+			return startOfDay(date);
+		case UnitOfTime.Week:
+			return startOfWeek(date);
+		case UnitOfTime.Month:
+			return startOfMonth(date);
+		case UnitOfTime.Year:
+			return startOfYear(date);
 		default:
 			return date;
 	}

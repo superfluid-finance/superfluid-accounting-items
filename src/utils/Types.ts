@@ -11,6 +11,7 @@ export interface StreamPeriodResult {
 	id: string;
 	flowRate: string;
 	token: Token;
+	chainId: number;
 	sender: {
 		id: Address;
 	};
