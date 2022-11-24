@@ -41,6 +41,9 @@ export const handler = async (event: AccountingRequest) => {
 		return {
 			statusCode: 200,
 			body: JSON.stringify(virtualizedStreamPeriods),
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+			},
 		};
 	} catch (e) {
 		return {
