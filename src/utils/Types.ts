@@ -1,3 +1,5 @@
+import { TimespanPrice } from './CoingeckoApi';
+
 export type Address = string;
 
 export interface Token {
@@ -45,4 +47,5 @@ export interface VirtualStreamPeriod {
 	startTime: number;
 	endTime: number;
 	amount: string;
+	amountFiat?: string;
 }

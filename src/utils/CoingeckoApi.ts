@@ -24,8 +24,7 @@ export interface CoingeckoCoin {
 }
 
 export interface TimespanPrice {
-	start: Date;
-	end: Date;
+	start: number; // UNIX timestamp
 	price: Number;
 }
 
@@ -89,8 +88,7 @@ function mapTokenPricesByGranularity(prices: [[string, string]], priceGranularit
 			}, 0) / (prices.length || 1); // Dividing fallback to 1 because we don't want to divide with 0
 
 		return {
-			start: getStartOfPeriod(fromUnixTime(Number(groupTimestamp)), priceGranularity),
-			end: getEndOfPeriod(fromUnixTime(Number(groupTimestamp)), priceGranularity),
+			start: getUnixTime(getStartOfPeriod(fromUnixTime(Number(groupTimestamp)), priceGranularity)),
 			price: averagePrice,
 		} as TimespanPrice;
 	});
