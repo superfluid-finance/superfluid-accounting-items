@@ -2,7 +2,6 @@ import { CoingeckoCoin, CoingeckoToken, fetchCoinPricesByGranularity, fetchCoins
 import { CurrencyCode } from '../utils/CurrencyUtils';
 import { UnitOfTime } from '../utils/DateUtils';
 import { networks } from '../utils/Network';
-import groupBy from 'lodash/fp/groupBy';
 
 export interface NetworkToken {
 	chainId: number;

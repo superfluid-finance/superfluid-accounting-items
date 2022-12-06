@@ -3,7 +3,7 @@ import { fromUnixTime, getUnixTime } from 'date-fns';
 import groupBy from 'lodash/fp/groupBy';
 import { NetworkToken } from '../services/TokenPriceService';
 import { CurrencyCode } from './CurrencyUtils';
-import { getEndOfPeriod, getStartOfPeriod, Interval, UnitOfTime } from './DateUtils';
+import { getStartOfPeriod, Interval, UnitOfTime } from './DateUtils';
 
 export interface CoingeckoCoin {
 	id: string;
@@ -35,13 +35,14 @@ export interface CoingeckoToken extends NetworkToken {
 
 export async function fetchCoins(): Promise<CoingeckoCoin[]> {
 	const query = new URLSearchParams({
+		x_cg_pro_api_key: process.env.COINGECKO_API_KEY || '',
 		include_platform: 'true',
 	});
 
-	return fetch(`https://api.coingecko.com/api/v3/coins/list?${query}`)
+	return fetch(`${process.env.COINGECKO_API_URL}/api/v3/coins/list?${query}`)
 		.then((res) => res?.json())
 		.catch((err) => {
-			console.log('Failed to fetch coingecko coins list.');
+			console.log('Failed to fetch coingecko coins list.', err);
 			throw err;
 		});
 }
@@ -54,22 +55,21 @@ export async function fetchCoinPricesByGranularity(
 	endTimestamp: number,
 ) {
 	const query = new URLSearchParams({
+		x_cg_pro_api_key: process.env.COINGECKO_API_KEY || '',
 		vs_currency: currency,
 		from: startTimestamp.toString(),
 		to: endTimestamp.toString(),
 		interval: Interval[priceGranularity],
 	});
 
-	return fetch(`https://api.coingecko.com/api/v3/coins/${token.coingeckoId}/market_chart/range?${query}`)
+	return fetch(`${process.env.COINGECKO_API_URL}/api/v3/coins/${token.coingeckoId}/market_chart/range?${query}`)
 		.then((res) => res?.json())
-		.then((response) => {
-			return {
-				...token,
-				prices: mapTokenPricesByGranularity(response.prices, priceGranularity),
-			};
-		})
+		.then((response) => ({
+			...token,
+			prices: mapTokenPricesByGranularity(response.prices, priceGranularity),
+		}))
 		.catch((err) => {
-			console.log('Failed to fetch coingecko coin prices.');
+			console.log('Failed to fetch coingecko coin prices.', err);
 			throw err;
 		});
 }

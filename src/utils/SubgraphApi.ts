@@ -28,8 +28,8 @@ export async function queryStreamPeriods(
 			},
 			query: streamPeriodsQuery,
 		})
-		.then((response: ApolloQueryResult<StreamPeriodsResults>) => {
-			return [
+		.then((response: ApolloQueryResult<StreamPeriodsResults>) =>
+			[
 				...response.data.inflowingStreamPeriods,
 				...response.data.outflowingStreamPeriods,
 				...response.data.inflowingActiveStreamPeriods,
@@ -37,9 +37,10 @@ export async function queryStreamPeriods(
 			].map((streamPeriod) => ({
 				...streamPeriod,
 				chainId: network.id,
-			}));
-		})
+			})),
+		)
 		.catch((e) => {
+			console.log(`Failed to fetch stream periods from ${network.name} subgraph`, e);
 			throw e;
 		});
 }

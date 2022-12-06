@@ -1,16 +1,14 @@
 import { fromUnixTime, getUnixTime, startOfMonth } from 'date-fns';
 import Decimal from 'decimal.js';
-import { BigNumber } from 'ethers';
-import { formatEther, parseEther } from 'ethers/lib/utils';
+import { formatEther } from 'ethers/lib/utils';
 import flatten from 'lodash/fp/flatten';
-import { CoingeckoToken, fetchCoins, TimespanPrice } from '../utils/CoingeckoApi';
+import { TimespanPrice } from '../utils/CoingeckoApi';
 import { CurrencyCode } from '../utils/CurrencyUtils';
 import { getEndOfPeriodTimestamp, UnitOfTime } from '../utils/DateUtils';
 import { Network } from '../utils/Network';
 import { queryStreamPeriods } from '../utils/SubgraphApi';
 import { Address, StreamPeriodResult, VirtualStreamPeriod } from '../utils/Types';
 import { getTokensPrices, NetworkToken } from './TokenPriceService';
-import maxBy from 'lodash/fp/maxBy';
 
 export async function getVirtualizedStreamPeriods(
 	address: Address,
