@@ -18,6 +18,7 @@ export async function queryStreamPeriods(
 	counterpartyAddresses: Address[],
 ): Promise<StreamPeriodResult[]> {
 	const client = getSubgraphClient(network);
+
 	return client
 		.query({
 			variables: {
@@ -26,7 +27,10 @@ export async function queryStreamPeriods(
 				accountAddress: address.toLowerCase(),
 				counterpartyAddresses: counterpartyAddresses.map((address) => address.toLowerCase()),
 			},
-			query: streamPeriodsQuery,
+			query:
+				counterpartyAddresses.length > 0
+					? streamPeriodsQueryWithCounterparty
+					: streamPeriodsQueryWithoutCounterparty,
 		})
 		.then((response: ApolloQueryResult<StreamPeriodsResults>) =>
 			[
@@ -55,12 +59,42 @@ function getSubgraphClient(network: Network) {
 	});
 }
 
-const streamPeriodsQuery = gql`
+const StreamPeriodFields = `
+fragment periodFields on StreamPeriod {
+	id
+	flowRate
+	token {
+		id
+		symbol
+		name
+		underlyingAddress
+	}
+	sender {
+		id
+	}
+	receiver {
+		id
+	}
+	startedAtTimestamp
+	startedAtBlockNumber
+	startedAtEvent {
+		transactionHash
+	}
+	stoppedAtTimestamp
+	stoppedAtBlockNumber
+	stoppedAtEvent {
+		transactionHash
+	}
+	totalAmountStreamed
+}
+`;
+
+const streamPeriodsQueryWithCounterparty = gql`
 	query GetStreamPeriodsForAddressWithin(
 		$from: BigInt!
 		$to: BigInt!
 		$accountAddress: String!
-		$counterpartyAddresses: [String!]
+		$counterpartyAddresses: [String]
 	) {
 		inflowingStreamPeriods: streamPeriods(
 			where: {
@@ -104,31 +138,37 @@ const streamPeriodsQuery = gql`
 		}
 	}
 
-	fragment periodFields on StreamPeriod {
-		id
-		flowRate
-		token {
-			id
-			symbol
-			name
-			underlyingAddress
+	${StreamPeriodFields}
+`;
+
+const streamPeriodsQueryWithoutCounterparty = gql`
+	query GetStreamPeriodsForAddressWithin(
+		$from: BigInt!
+		$to: BigInt!
+		$accountAddress: String!
+		$counterpartyAddresses: [String]
+	) {
+		inflowingStreamPeriods: streamPeriods(
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, receiver: $accountAddress }
+		) {
+			...periodFields
 		}
-		sender {
-			id
+		outflowingStreamPeriods: streamPeriods(
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, sender: $accountAddress }
+		) {
+			...periodFields
 		}
-		receiver {
-			id
+		inflowingActiveStreamPeriods: streamPeriods(
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, receiver: $accountAddress }
+		) {
+			...periodFields
 		}
-		startedAtTimestamp
-		startedAtBlockNumber
-		startedAtEvent {
-			transactionHash
+		outflowingActiveStreamPeriods: streamPeriods(
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, sender: $accountAddress }
+		) {
+			...periodFields
 		}
-		stoppedAtTimestamp
-		stoppedAtBlockNumber
-		stoppedAtEvent {
-			transactionHash
-		}
-		totalAmountStreamed
 	}
+
+	${StreamPeriodFields}
 `;

@@ -13,7 +13,7 @@ export interface AccountingRequest extends Event {
 		priceGranularity: number;
 		virtualization: number;
 		currency: CurrencyCode;
-		receivers: string;
+		receivers?: string;
 	};
 }
 
@@ -21,10 +21,18 @@ export const handler = async (event: AccountingRequest) => {
 	try {
 		// TODO: Transform inputs (less error prone)
 		// TODO: Validate inputs
-		const { chains, address, start, end, virtualization, receivers, currency, priceGranularity } =
-			event.queryStringParameters;
+		const {
+			chains,
+			address,
+			start,
+			end,
+			virtualization,
+			receivers = '',
+			currency,
+			priceGranularity,
+		} = event.queryStringParameters;
 
-		const counterpartyAddresses = receivers.split(',');
+		const counterpartyAddresses = receivers.split(',').filter((addr) => !!addr);
 		const mappedNetworks = chains.split(',').map((chain) => networks[Number(chain)]);
 
 		const virtualizedStreamPeriods = await getVirtualizedStreamPeriods(
