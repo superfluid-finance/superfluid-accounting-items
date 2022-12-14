@@ -7,10 +7,14 @@ export interface Token {
 	underlyingAddress: Address;
 }
 
-export interface StreamPeriodResult {
+interface GraphqlType {
+	__typename: string;
+}
+
+export interface StreamPeriodResult extends GraphqlType {
 	id: string;
 	flowRate: string;
-	token: Token;
+	token: Token & GraphqlType;
 	chainId: number;
 	sender: {
 		id: Address;

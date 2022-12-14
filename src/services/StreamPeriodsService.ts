@@ -58,10 +58,19 @@ export async function getVirtualizedStreamPeriods(
 }
 
 function mapStreamPeriodResult(streamPeriod: StreamPeriodResult, virtualPeriods: VirtualStreamPeriod[]) {
-	const { sender, receiver, startedAtEvent, stoppedAtEvent, ...rest } = streamPeriod;
+	const {
+		sender,
+		receiver,
+		startedAtEvent,
+		stoppedAtEvent,
+		__typename,
+		token: { __typename: _tokenType, ...tokenRest },
+		...rest
+	} = streamPeriod;
 
 	return {
 		...rest,
+		token: tokenRest,
 		sender: sender.id,
 		receiver: receiver.id,
 		startedAtEvent: startedAtEvent.transactionHash,
