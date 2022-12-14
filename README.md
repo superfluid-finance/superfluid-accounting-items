@@ -15,7 +15,6 @@ yarn install
 2) Install netlify cli (more info at `https://docs.netlify.com/cli/get-started/`)
 ```
 npm install netlify-cli -g
-
 ```
 
 3) Run netlify
@@ -31,14 +30,14 @@ netlify dev
 `http://localhost:8888/v1/stream-periods`
 
 **Query params:**
-`chains` - string (chain ID-s separated by comma) <br />
-`address` - string (account address) <br />
-`start` - number (unix timestamp) <br />
-`end` - number (unix timestamp) <br />
-`priceGranularity` - UnitOfTime (timespan in seconds, only UnitOfTime values are accepted) <br />
-`virtualization` - UnitOfTime (timespan in seconds, only UnitOfTime values are accepted) <br />
-`currency` - CurrencyCode (ISO 3-Letter Currency Code) <br />
-`receivers` - string (receiver addresses separated by comma) <br />
+`chains` - **string** (chain ID-s separated by comma) <br />
+`address` - **string** (account address) <br />
+`start` - **number** (unix timestamp) <br />
+`end` - **number** (unix timestamp) <br />
+`priceGranularity` - **UnitOfTime** (timespan in seconds, only UnitOfTime values are accepted) <br />
+`virtualization` - **UnitOfTime** (timespan in seconds, only UnitOfTime values are accepted) <br />
+`currency` - **CurrencyCode** (ISO 3-Letter Currency Code) <br />
+`counterparties` - **string** (receiver addresses separated by comma). This field is optional. If no counterparties are provided, everyone will be selected <br />
 
 **Example request**
 ```

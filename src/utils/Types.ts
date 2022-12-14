@@ -1,5 +1,3 @@
-import { TimespanPrice } from './CoingeckoApi';
-
 export type Address = string;
 
 export interface Token {
@@ -35,12 +33,19 @@ export interface StreamPeriodResult {
 
 export interface StreamPeriod {
 	id: string;
-	startTime: number;
-	endTime: number;
-	amount: string;
+	flowRate: string;
 	token: Token;
+	chainId: number;
 	sender: Address;
 	receiver: Address;
+	startedAtTimestamp: number;
+	startedAtBlockNumber: number;
+	startedAtEvent: string;
+	stoppedAtTimestamp?: number;
+	stoppedAtBlockNumber?: number;
+	stoppedAtEvent?: string;
+	totalAmountStreamed: string;
+	virtualPeriods?: VirtualStreamPeriod[];
 }
 
 export interface VirtualStreamPeriod {

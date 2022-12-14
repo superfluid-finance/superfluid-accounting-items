@@ -7,7 +7,7 @@ import { CurrencyCode } from '../utils/CurrencyUtils';
 import { getEndOfPeriodTimestamp, UnitOfTime } from '../utils/DateUtils';
 import { Network } from '../utils/Network';
 import { queryStreamPeriods } from '../utils/SubgraphApi';
-import { Address, StreamPeriodResult, VirtualStreamPeriod } from '../utils/Types';
+import { Address, StreamPeriod, StreamPeriodResult, VirtualStreamPeriod } from '../utils/Types';
 import { getTokensPrices, NetworkToken } from './TokenPriceService';
 import maxBy from 'lodash/fp/maxBy';
 
@@ -20,7 +20,7 @@ export async function getVirtualizedStreamPeriods(
 	counterpartyAddresses: Address[],
 	currency: CurrencyCode,
 	priceGranularity: UnitOfTime,
-) {
+): Promise<StreamPeriod[]> {
 	// Fetch all stream periods
 	const networksStreamPeriods = await Promise.all(
 		networks.map((network) =>
@@ -46,18 +46,28 @@ export async function getVirtualizedStreamPeriods(
 				tokenWithPriceData.chainId === streamPeriod.chainId &&
 				tokenWithPriceData.token.toLowerCase() === streamPeriod.token.underlyingAddress.toLowerCase(),
 		);
-
-		return {
-			...streamPeriod,
-			virtualPeriods: virtualizeStreamPeriod(
-				streamPeriod,
-				fromUnixTime(startTimestamp),
-				fromUnixTime(endTimestamp),
-				period,
-				tokenPriceData?.prices || [],
-			),
-		};
+		const virtualPeriods = virtualizeStreamPeriod(
+			streamPeriod,
+			fromUnixTime(startTimestamp),
+			fromUnixTime(endTimestamp),
+			period,
+			tokenPriceData?.prices || [],
+		);
+		return mapStreamPeriodResult(streamPeriod, virtualPeriods);
 	});
+}
+
+function mapStreamPeriodResult(streamPeriod: StreamPeriodResult, virtualPeriods: VirtualStreamPeriod[]) {
+	const { sender, receiver, startedAtEvent, stoppedAtEvent, ...rest } = streamPeriod;
+
+	return {
+		...rest,
+		sender: sender.id,
+		receiver: receiver.id,
+		startedAtEvent: startedAtEvent.transactionHash,
+		stoppedAtEvent: stoppedAtEvent.transactionHash,
+		virtualPeriods,
+	};
 }
 
 /**
@@ -70,7 +80,7 @@ function virtualizeStreamPeriod(
 	endDate: Date,
 	period: UnitOfTime,
 	priceData: TimespanPrice[],
-) {
+): Array<VirtualStreamPeriod> {
 	const { flowRate, startedAtTimestamp, stoppedAtTimestamp } = streamPeriod;
 
 	const streamStoppedTimestamp = stoppedAtTimestamp || getUnixTime(Date.now());
@@ -100,6 +110,7 @@ function virtualizeStreamPeriod(
 	if (endTimestamp <= virtualPeriodEndTimestamp) return [virtualStreamPeriod];
 
 	const nextPeriodStartDate = fromUnixTime(virtualPeriodEndTimestamp + 1);
+
 	return [
 		virtualStreamPeriod,
 		...virtualizeStreamPeriod(streamPeriod, nextPeriodStartDate, endDate, period, priceData),
@@ -163,7 +174,7 @@ function mapPriceDataToVirtualStreamPeriodRecursive(
 	startTimestamp: number,
 	endTimestamp: number,
 	priceData: TimespanPrice[],
-) {
+): Decimal {
 	const [timespanPrice, ...remainingPriceData] = priceData;
 	const [nextTimespanPrice] = remainingPriceData;
 

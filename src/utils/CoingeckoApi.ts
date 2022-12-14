@@ -20,6 +20,8 @@ export interface CoingeckoCoin {
 		'fantom'?: string;
 		'polygon-pos'?: string;
 		'huobi-token'?: string;
+		'arbitrum-one'?: string;
+		'xdai'?: string;
 	};
 }
 

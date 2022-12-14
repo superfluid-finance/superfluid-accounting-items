@@ -1,47 +1,41 @@
-import { networks } from '../utils/Network';
 import { getVirtualizedStreamPeriods } from '../services/StreamPeriodsService';
-import { Address } from '../utils/Types';
 import { CurrencyCode } from '../utils/CurrencyUtils';
 import { UnitOfTime } from '../utils/DateUtils';
+import { networks } from '../utils/Network';
 
-export interface AccountingRequest extends Event {
-	queryStringParameters: {
-		chains: string;
-		address: Address;
-		start: number;
-		end: number;
-		priceGranularity: number;
-		virtualization: number;
-		currency: CurrencyCode;
-		receivers?: string;
-	};
-}
+import { Event } from '@netlify/functions/dist/function/event';
+import { z } from 'zod';
 
-export const handler = async (event: AccountingRequest) => {
+export const AccountingQuery = z.object({
+	chains: z
+		.string()
+		.transform((chains) => chains.split(',').map((chain) => networks[Number(chain)])) // Map to networks
+		.refine((chains) => !chains.some((chain) => !chain)), // Checking for null values
+	address: z.string(),
+	start: z.preprocess((start) => Number(start), z.number()),
+	end: z.preprocess((end) => Number(end), z.number()),
+	priceGranularity: z.preprocess((priceGranularity) => Number(priceGranularity), z.nativeEnum(UnitOfTime)),
+	virtualization: z.preprocess((virtualization) => Number(virtualization), z.nativeEnum(UnitOfTime)),
+	currency: z.nativeEnum(CurrencyCode),
+	counterparties: z
+		.string()
+		.optional()
+		.default('')
+		.transform((counterparties) => counterparties.split(',').filter((addr) => !!addr)),
+});
+
+export const handler = async (event: Event) => {
 	try {
-		// TODO: Transform inputs (less error prone)
-		// TODO: Validate inputs
-		const {
-			chains,
-			address,
-			start,
-			end,
-			virtualization,
-			receivers = '',
-			currency,
-			priceGranularity,
-		} = event.queryStringParameters;
-
-		const counterpartyAddresses = receivers.split(',').filter((addr) => !!addr);
-		const mappedNetworks = chains.split(',').map((chain) => networks[Number(chain)]);
+		const { chains, address, start, end, virtualization, currency, priceGranularity, counterparties } =
+			AccountingQuery.parse(event.queryStringParameters);
 
 		const virtualizedStreamPeriods = await getVirtualizedStreamPeriods(
 			address,
-			mappedNetworks,
+			chains,
 			Number(start),
 			Number(end),
 			Number(virtualization) as UnitOfTime,
-			counterpartyAddresses,
+			counterparties,
 			currency as CurrencyCode,
 			Number(priceGranularity) as UnitOfTime,
 		);
@@ -53,7 +47,7 @@ export const handler = async (event: AccountingRequest) => {
 				'Access-Control-Allow-Origin': '*',
 			},
 		};
-	} catch (e) {
+	} catch (e: any) {
 		return {
 			statusCode: 500,
 			body: e.message,

@@ -26,9 +26,13 @@ export enum UnitOfTime {
 }
 
 export const Interval = {
+	[UnitOfTime.Second]: 'every-second',
+	[UnitOfTime.Minute]: 'every-minute',
+	[UnitOfTime.Hour]: 'every-hour',
 	[UnitOfTime.Day]: 'daily',
 	[UnitOfTime.Week]: 'weekly',
 	[UnitOfTime.Month]: 'monthly',
+	[UnitOfTime.Year]: 'yearly',
 };
 
 export function getEndOfPeriodTimestamp(timestamp: number, period: UnitOfTime) {
