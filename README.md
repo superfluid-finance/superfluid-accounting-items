@@ -37,11 +37,11 @@ netlify dev
 `priceGranularity` - **UnitOfTime** (timespan in seconds, only UnitOfTime values are accepted) <br />
 `virtualization` - **UnitOfTime** (timespan in seconds, only UnitOfTime values are accepted) <br />
 `currency` - **CurrencyCode** (ISO 3-Letter Currency Code) <br />
-`counterparties` - **string** (receiver addresses separated by comma). This field is optional. If no counterparties are provided, everyone will be selected <br />
+`counterparties` - **string** (addresses separated by comma). This field is optional. If no counterparties are provided, everyone will be selected <br />
 
 **Example request**
 ```
-http://localhost:8888/v1/stream-periods?address=0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980&chains=100%2C137%2C10%2C42161%2C43114%2C56&start=1638309600&end=1669845599&priceGranularity=86400&virtualization=2592000&currency=USD&receivers=0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac%2C0x7269B0c7C831598465a9EB17F6c5a03331353dAF
+http://localhost:8888/v1/stream-periods?address=0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980&chains=100%2C137%2C10%2C42161%2C43114%2C56&start=1638309600&end=1669845599&priceGranularity=86400&virtualization=2592000&currency=USD&counterparties=0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac%2C0x7269B0c7C831598465a9EB17F6c5a03331353dAF
 ```
 
 *UnitOfTime* (use numerical value)

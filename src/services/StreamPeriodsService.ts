@@ -65,7 +65,7 @@ function mapStreamPeriodResult(streamPeriod: StreamPeriodResult, virtualPeriods:
 		sender: sender.id,
 		receiver: receiver.id,
 		startedAtEvent: startedAtEvent.transactionHash,
-		stoppedAtEvent: stoppedAtEvent.transactionHash,
+		stoppedAtEvent: stoppedAtEvent?.transactionHash,
 		virtualPeriods,
 	};
 }
