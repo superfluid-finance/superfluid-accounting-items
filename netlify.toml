@@ -1,4 +1,5 @@
 [functions]
+  node_bundler = "esbuild"
   directory = "src/endpoints"
 
 [[headers]]

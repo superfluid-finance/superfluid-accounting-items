@@ -79,3 +79,13 @@ NOK
 RUB
 SEK
 ```
+
+### Swagger Documentation
+
+**URL**
+`https://accounting.superfluid.dev/v1/swagger`
+
+### OpenAPI Configuration
+
+**URL**
+`https://accounting.superfluid.dev/static/api-docs.yaml`
