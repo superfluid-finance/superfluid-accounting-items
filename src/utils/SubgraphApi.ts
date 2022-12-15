@@ -97,6 +97,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 		$counterpartyAddresses: [String]
 	) {
 		inflowingStreamPeriods: streamPeriods(
+			first: 1000
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp_gte: $from
@@ -107,6 +108,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 			...periodFields
 		}
 		outflowingStreamPeriods: streamPeriods(
+			first: 1000
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp_gte: $from
@@ -117,6 +119,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 			...periodFields
 		}
 		inflowingActiveStreamPeriods: streamPeriods(
+			first: 1000
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp: null
@@ -127,6 +130,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 			...periodFields
 		}
 		outflowingActiveStreamPeriods: streamPeriods(
+			first: 1000
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp: null
@@ -149,21 +153,25 @@ const streamPeriodsQueryWithoutCounterparty = gql`
 		$counterpartyAddresses: [String]
 	) {
 		inflowingStreamPeriods: streamPeriods(
+			first: 1000
 			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, receiver: $accountAddress }
 		) {
 			...periodFields
 		}
 		outflowingStreamPeriods: streamPeriods(
+			first: 1000
 			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, sender: $accountAddress }
 		) {
 			...periodFields
 		}
 		inflowingActiveStreamPeriods: streamPeriods(
+			first: 1000
 			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, receiver: $accountAddress }
 		) {
 			...periodFields
 		}
 		outflowingActiveStreamPeriods: streamPeriods(
+			first: 1000
 			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, sender: $accountAddress }
 		) {
 			...periodFields
