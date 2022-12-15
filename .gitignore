@@ -1,3 +1,4 @@
+.env
 # Logs
 logs
 *.log
@@ -67,3 +68,6 @@ typings/
 .project
 .DS_Store
 .dockerignore
+
+# Local Netlify folder
+.netlify
