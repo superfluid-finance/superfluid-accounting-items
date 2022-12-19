@@ -50,7 +50,7 @@ export const handler = async (event: Event) => {
 	} catch (e: any) {
 		return {
 			statusCode: 500,
-			body: e.toString(),
+			body: e.message,
 		};
 	}
 };
