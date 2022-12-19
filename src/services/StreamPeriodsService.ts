@@ -30,7 +30,6 @@ export async function getVirtualizedStreamPeriods(
 
 	const streamPeriods = flatten(networksStreamPeriods);
 	const uniqueTokens = getUniqueNetworkTokenAddresses(streamPeriods);
-
 	const tokensWithPriceData = await getTokensPrices(
 		uniqueTokens,
 		currency,
@@ -46,6 +45,7 @@ export async function getVirtualizedStreamPeriods(
 				tokenWithPriceData.chainId === streamPeriod.chainId &&
 				tokenWithPriceData.token.toLowerCase() === streamPeriod.token.underlyingAddress.toLowerCase(),
 		);
+
 		const virtualPeriods = virtualizeStreamPeriod(
 			streamPeriod,
 			fromUnixTime(startTimestamp),
@@ -53,6 +53,7 @@ export async function getVirtualizedStreamPeriods(
 			period,
 			tokenPriceData?.prices || [],
 		);
+
 		return mapStreamPeriodResult(streamPeriod, virtualPeriods);
 	});
 }
@@ -107,13 +108,13 @@ function virtualizeStreamPeriod(
 	const virtualStreamPeriod: VirtualStreamPeriod = {
 		startTime: streamPeriodStartTimestamp,
 		endTime: streamPeriodEndTimestamp,
-		amount: getAmountInTimespan(streamPeriodStartTimestamp, streamPeriodEndTimestamp, flowRate).toString(),
+		amount: getAmountInTimespan(streamPeriodStartTimestamp, streamPeriodEndTimestamp, flowRate).toFixed(),
 		amountFiat: calculateVirtualStreamPeriodPrice(
 			streamPeriodStartTimestamp,
 			streamPeriodEndTimestamp,
 			flowRate,
 			priceData,
-		).toString(),
+		).toFixed(),
 	};
 
 	if (endTimestamp <= virtualPeriodEndTimestamp) return [virtualStreamPeriod];
@@ -193,7 +194,7 @@ function mapPriceDataToVirtualStreamPeriodRecursive(
 	const end = Math.min(nextTimespanPrice ? nextTimespanPrice.start : Infinity, endTimestamp);
 
 	const amountWei = new Decimal(end - start).mul(new Decimal(flowRate));
-	const amountEther = new Decimal(formatEther(amountWei.toString()).toString());
+	const amountEther = new Decimal(formatEther(amountWei.toFixed()).toString());
 	const amountFiat = amountEther.mul(new Decimal(timespanPrice.price.toString()));
 	const newTotal = currentTotal.add(amountFiat);
 
