@@ -11,7 +11,7 @@ export interface StreamPeriodsResults {
 }
 
 export async function queryStreamPeriods(
-	address: Address,
+	addresses: Address[],
 	network: Network,
 	startTimestamp: number,
 	endTimestamp: number,
@@ -24,8 +24,8 @@ export async function queryStreamPeriods(
 			variables: {
 				from: startTimestamp,
 				to: endTimestamp,
-				accountAddress: address.toLowerCase(),
-				counterpartyAddresses: counterpartyAddresses.map((address) => address.toLowerCase()),
+				addresses,
+				counterpartyAddresses,
 			},
 			query:
 				counterpartyAddresses.length > 0
@@ -93,7 +93,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 	query GetStreamPeriodsForAddressWithin(
 		$from: BigInt!
 		$to: BigInt!
-		$accountAddress: String!
+		$addresses: [String!]!
 		$counterpartyAddresses: [String]
 	) {
 		inflowingStreamPeriods: streamPeriods(
@@ -101,7 +101,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp_gte: $from
-				receiver: $accountAddress
+				receiver_in: $addresses
 				sender_in: $counterpartyAddresses
 			}
 		) {
@@ -112,7 +112,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp_gte: $from
-				sender: $accountAddress
+				sender_in: $addresses
 				receiver_in: $counterpartyAddresses
 			}
 		) {
@@ -123,7 +123,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp: null
-				receiver: $accountAddress
+				receiver_in: $addresses
 				sender_in: $counterpartyAddresses
 			}
 		) {
@@ -134,7 +134,7 @@ const streamPeriodsQueryWithCounterparty = gql`
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp: null
-				sender: $accountAddress
+				sender_in: $addresses
 				receiver_in: $counterpartyAddresses
 			}
 		) {
@@ -149,30 +149,30 @@ const streamPeriodsQueryWithoutCounterparty = gql`
 	query GetStreamPeriodsForAddressWithin(
 		$from: BigInt!
 		$to: BigInt!
-		$accountAddress: String!
+		$addresses: [String!]!
 		$counterpartyAddresses: [String]
 	) {
 		inflowingStreamPeriods: streamPeriods(
 			first: 1000
-			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, receiver: $accountAddress }
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, receiver_in: $addresses }
 		) {
 			...periodFields
 		}
 		outflowingStreamPeriods: streamPeriods(
 			first: 1000
-			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, sender: $accountAddress }
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, sender_in: $addresses }
 		) {
 			...periodFields
 		}
 		inflowingActiveStreamPeriods: streamPeriods(
 			first: 1000
-			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, receiver: $accountAddress }
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, receiver_in: $addresses }
 		) {
 			...periodFields
 		}
 		outflowingActiveStreamPeriods: streamPeriods(
 			first: 1000
-			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, sender: $accountAddress }
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, sender_in: $addresses }
 		) {
 			...periodFields
 		}

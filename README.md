@@ -36,7 +36,7 @@ http://localhost:8888
 
 **Query params:**
 `chains` - **string** (chain ID-s separated by comma) <br />
-`address` - **string** (account address) <br />
+`addresses` - **string** (addresses separated by comma) <br />
 `start` - **number** (unix timestamp) <br />
 `end` - **number** (unix timestamp) <br />
 `priceGranularity` - **UnitOfTime** (timespan in seconds, only UnitOfTime values are accepted) <br />

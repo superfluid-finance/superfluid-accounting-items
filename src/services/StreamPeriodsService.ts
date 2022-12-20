@@ -12,7 +12,7 @@ import { getTokensPrices, NetworkToken } from './TokenPriceService';
 import maxBy from 'lodash/fp/maxBy';
 
 export async function getVirtualizedStreamPeriods(
-	address: Address,
+	addresses: Address[],
 	networks: Network[],
 	startTimestamp: number = getUnixTime(startOfMonth(Date.now())),
 	endTimestamp: number = getUnixTime(Date.now()),
@@ -24,7 +24,7 @@ export async function getVirtualizedStreamPeriods(
 	// Fetch all stream periods
 	const networksStreamPeriods = await Promise.all(
 		networks.map((network) =>
-			queryStreamPeriods(address, network, startTimestamp, endTimestamp, counterpartyAddresses),
+			queryStreamPeriods(addresses, network, startTimestamp, endTimestamp, counterpartyAddresses),
 		),
 	);
 
