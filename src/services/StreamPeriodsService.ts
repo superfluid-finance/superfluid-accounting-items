@@ -47,6 +47,7 @@ export async function getVirtualizedStreamPeriods(
 		);
 
 		const virtualPeriods = virtualizeStreamPeriod(
+			addresses,
 			streamPeriod,
 			fromUnixTime(startTimestamp),
 			fromUnixTime(endTimestamp),
@@ -85,6 +86,7 @@ function mapStreamPeriodResult(streamPeriod: StreamPeriodResult, virtualPeriods:
  * Amounts are calculated based on the overlapping period of date filter, stream period and virtualized period.
  */
 function virtualizeStreamPeriod(
+	addresses: Address[],
 	streamPeriod: StreamPeriodResult,
 	startDate: Date,
 	endDate: Date,
@@ -105,16 +107,20 @@ function virtualizeStreamPeriod(
 	// Timestamp when stream period, virtual period end and end date filter stop overlapping
 	const streamPeriodEndTimestamp = Math.min(virtualPeriodEndTimestamp, endTimestamp);
 
+	const isOutgoing = addresses.includes(streamPeriod.sender.id.toLowerCase());
+	const amount = getAmountInTimespan(streamPeriodStartTimestamp, streamPeriodEndTimestamp, flowRate);
+	const amountFiat = calculateVirtualStreamPeriodPrice(
+		streamPeriodStartTimestamp,
+		streamPeriodEndTimestamp,
+		flowRate,
+		priceData,
+	);
+
 	const virtualStreamPeriod: VirtualStreamPeriod = {
 		startTime: streamPeriodStartTimestamp,
 		endTime: streamPeriodEndTimestamp,
-		amount: getAmountInTimespan(streamPeriodStartTimestamp, streamPeriodEndTimestamp, flowRate).toFixed(),
-		amountFiat: calculateVirtualStreamPeriodPrice(
-			streamPeriodStartTimestamp,
-			streamPeriodEndTimestamp,
-			flowRate,
-			priceData,
-		).toFixed(),
+		amount: setDecimalSign(amount, isOutgoing).toFixed(),
+		amountFiat: setDecimalSign(amountFiat, isOutgoing).toFixed(),
 	};
 
 	if (endTimestamp <= virtualPeriodEndTimestamp) return [virtualStreamPeriod];
@@ -123,8 +129,13 @@ function virtualizeStreamPeriod(
 
 	return [
 		virtualStreamPeriod,
-		...virtualizeStreamPeriod(streamPeriod, nextPeriodStartDate, endDate, period, priceData),
+		...virtualizeStreamPeriod(addresses, streamPeriod, nextPeriodStartDate, endDate, period, priceData),
 	];
+}
+
+function setDecimalSign(decimal: Decimal, negative: boolean) {
+	if ((negative && Decimal.sign(decimal) < 0) || (!negative && Decimal.sign(decimal) > 0)) return decimal;
+	return decimal.mul(-1);
 }
 
 function getAmountInTimespan(startTimestamp: number, endTimestamp: number, flowRate: string): Decimal {
