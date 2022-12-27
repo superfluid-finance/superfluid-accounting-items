@@ -1,4 +1,5 @@
-import { ApolloQueryResult, gql, ApolloClient, HttpLink, InMemoryCache } from '@apollo/client/core';
+import { NormalizedCacheObject } from '@apollo/client';
+import { ApolloClient, DocumentNode, gql, HttpLink, InMemoryCache } from '@apollo/client/core';
 import fetch from 'cross-fetch';
 import { Network } from './Network';
 import { Address, StreamPeriodResult } from './Types';
@@ -10,43 +11,89 @@ export interface StreamPeriodsResults {
 	outflowingActiveStreamPeriods: StreamPeriodResult[];
 }
 
+interface StreamPeriodVariables {
+	network: Network;
+	from: number;
+	to: number;
+	addresses: Address[];
+	counterpartyAddresses: Address[];
+	first: number;
+	skip: number;
+}
+
 export async function queryStreamPeriods(
-	address: Address,
+	addresses: Address[],
 	network: Network,
 	startTimestamp: number,
 	endTimestamp: number,
 	counterpartyAddresses: Address[],
 ): Promise<StreamPeriodResult[]> {
 	const client = getSubgraphClient(network);
+	const query =
+		counterpartyAddresses.length > 0 ? streamPeriodsQueryWithCounterparty : streamPeriodsQueryWithoutCounterparty;
 
-	return client
+	return queryStreamPeriodsRecursive(
+		{ network, addresses, from: startTimestamp, to: endTimestamp, counterpartyAddresses, first: 1000, skip: 0 },
+		query,
+		client,
+		[],
+		0,
+	);
+}
+
+async function queryStreamPeriodsRecursive(
+	variables: StreamPeriodVariables,
+	query: DocumentNode,
+	client: ApolloClient<NormalizedCacheObject>,
+	streamPeriods: Array<StreamPeriodResult>,
+	currentPage: number,
+): Promise<StreamPeriodResult[]> {
+	const response = await client
 		.query({
-			variables: {
-				from: startTimestamp,
-				to: endTimestamp,
-				accountAddress: address.toLowerCase(),
-				counterpartyAddresses: counterpartyAddresses.map((address) => address.toLowerCase()),
-			},
-			query:
-				counterpartyAddresses.length > 0
-					? streamPeriodsQueryWithCounterparty
-					: streamPeriodsQueryWithoutCounterparty,
+			variables,
+			query,
 		})
-		.then((response: ApolloQueryResult<StreamPeriodsResults>) =>
-			[
-				...response.data.inflowingStreamPeriods,
-				...response.data.outflowingStreamPeriods,
-				...response.data.inflowingActiveStreamPeriods,
-				...response.data.outflowingActiveStreamPeriods,
-			].map((streamPeriod) => ({
-				...streamPeriod,
-				chainId: network.id,
-			})),
-		)
 		.catch((e) => {
-			console.log(`Failed to fetch stream periods from ${network.name} subgraph`, e);
+			console.log(`Failed to fetch stream periods from ${variables.network.name} subgraph`, variables, e);
 			throw e;
 		});
+
+	const {
+		inflowingStreamPeriods,
+		outflowingStreamPeriods,
+		inflowingActiveStreamPeriods,
+		outflowingActiveStreamPeriods,
+	} = response.data;
+
+	const fetchedStreamPeriods = [
+		...inflowingStreamPeriods,
+		...outflowingStreamPeriods,
+		...inflowingActiveStreamPeriods,
+		...outflowingActiveStreamPeriods,
+	].map((streamPeriod) => ({
+		...streamPeriod,
+		chainId: variables.network.id,
+	}));
+
+	const allStreamPeriods = streamPeriods.concat(fetchedStreamPeriods);
+
+	if (
+		inflowingStreamPeriods.length >= variables.first ||
+		outflowingStreamPeriods.length >= variables.first ||
+		inflowingActiveStreamPeriods.length >= variables.first ||
+		outflowingActiveStreamPeriods.length >= variables.first
+	) {
+		const { skip, first, ...nextVariables } = variables;
+		return queryStreamPeriodsRecursive(
+			{ ...nextVariables, first, skip: skip + first * currentPage },
+			query,
+			client,
+			allStreamPeriods,
+			currentPage + 1,
+		);
+	}
+
+	return allStreamPeriods;
 }
 
 function getSubgraphClient(network: Network) {
@@ -93,48 +140,54 @@ const streamPeriodsQueryWithCounterparty = gql`
 	query GetStreamPeriodsForAddressWithin(
 		$from: BigInt!
 		$to: BigInt!
-		$accountAddress: String!
+		$addresses: [String!]!
 		$counterpartyAddresses: [String]
+		$first: Int!
+		$skip: Int!
 	) {
 		inflowingStreamPeriods: streamPeriods(
-			first: 1000
+			first: $first
+			skip: $skip
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp_gte: $from
-				receiver: $accountAddress
+				receiver_in: $addresses
 				sender_in: $counterpartyAddresses
 			}
 		) {
 			...periodFields
 		}
 		outflowingStreamPeriods: streamPeriods(
-			first: 1000
+			first: $first
+			skip: $skip
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp_gte: $from
-				sender: $accountAddress
+				sender_in: $addresses
 				receiver_in: $counterpartyAddresses
 			}
 		) {
 			...periodFields
 		}
 		inflowingActiveStreamPeriods: streamPeriods(
-			first: 1000
+			first: $first
+			skip: $skip
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp: null
-				receiver: $accountAddress
+				receiver_in: $addresses
 				sender_in: $counterpartyAddresses
 			}
 		) {
 			...periodFields
 		}
 		outflowingActiveStreamPeriods: streamPeriods(
-			first: 1000
+			first: $first
+			skip: $skip
 			where: {
 				startedAtTimestamp_lt: $to
 				stoppedAtTimestamp: null
-				sender: $accountAddress
+				sender_in: $addresses
 				receiver_in: $counterpartyAddresses
 			}
 		) {
@@ -149,30 +202,36 @@ const streamPeriodsQueryWithoutCounterparty = gql`
 	query GetStreamPeriodsForAddressWithin(
 		$from: BigInt!
 		$to: BigInt!
-		$accountAddress: String!
+		$addresses: [String!]!
 		$counterpartyAddresses: [String]
+		$first: Int!
+		$skip: Int!
 	) {
 		inflowingStreamPeriods: streamPeriods(
-			first: 1000
-			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, receiver: $accountAddress }
+			first: $first
+			skip: $skip
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, receiver_in: $addresses }
 		) {
 			...periodFields
 		}
 		outflowingStreamPeriods: streamPeriods(
-			first: 1000
-			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, sender: $accountAddress }
+			first: $first
+			skip: $skip
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp_gte: $from, sender_in: $addresses }
 		) {
 			...periodFields
 		}
 		inflowingActiveStreamPeriods: streamPeriods(
-			first: 1000
-			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, receiver: $accountAddress }
+			first: $first
+			skip: $skip
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, receiver_in: $addresses }
 		) {
 			...periodFields
 		}
 		outflowingActiveStreamPeriods: streamPeriods(
-			first: 1000
-			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, sender: $accountAddress }
+			first: $first
+			skip: $skip
+			where: { startedAtTimestamp_lt: $to, stoppedAtTimestamp: null, sender_in: $addresses }
 		) {
 			...periodFields
 		}

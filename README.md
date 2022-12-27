@@ -36,7 +36,7 @@ http://localhost:8888
 
 **Query params:**
 `chains` - **string** (chain ID-s separated by comma) <br />
-`address` - **string** (account address) <br />
+`addresses` - **string** (addresses separated by comma) <br />
 `start` - **number** (unix timestamp) <br />
 `end` - **number** (unix timestamp) <br />
 `priceGranularity` - **UnitOfTime** (timespan in seconds, only UnitOfTime values are accepted) <br />
@@ -46,7 +46,7 @@ http://localhost:8888
 
 **Example request**
 ```
-https://accounting.superfluid.dev/v1/stream-periods?address=0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980&chains=100%2C137%2C10%2C42161%2C43114%2C56&start=1638309600&end=1669845599&priceGranularity=86400&virtualization=2592000&currency=USD&counterparties=0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac%2C0x7269B0c7C831598465a9EB17F6c5a03331353dAF
+https://accounting.superfluid.dev/v1/stream-periods?addresses=0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980&chains=100%2C137%2C10%2C42161%2C43114%2C56&start=1638309600&end=1669845599&priceGranularity=86400&virtualization=2592000&currency=USD&counterparties=0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac%2C0x7269B0c7C831598465a9EB17F6c5a03331353dAF
 ```
 
 *UnitOfTime* (use numerical value)

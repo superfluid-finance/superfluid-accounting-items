@@ -135,11 +135,14 @@ paths:
             items:
               $ref: '#/components/schemas/Network'
         - in: query
-          name: address
+          name: addresses
           required: true
+          explode: false
           schema:
-            type: string
-            example: '0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980'
+            type: array
+            example: '0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980,0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac'
+            items:
+              type: string
         - in: query
           name: start
           required: true
