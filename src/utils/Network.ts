@@ -4,58 +4,58 @@ export interface Network {
 	id: number;
 	slug: string;
 	name: string;
-	subgraphId: string;
+	subgraphUrl: string;
 	coingeckoId: keyof CoingeckoCoin['platforms'];
 }
 
 export const networks: { [any: number]: Network } = {
+	1: {
+		id: 1,
+		slug: 'ethereum',
+		name: 'Ethereum',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-eth-mainnet',
+		coingeckoId: 'xdai',
+	},
 	100: {
 		id: 100,
 		slug: 'gnosis',
 		name: 'Gnosis Chain',
-		subgraphId: 'protocol-v1-xdai',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-xdai',
 		coingeckoId: 'xdai',
 	},
 	137: {
 		id: 137,
 		slug: 'polygon',
 		name: 'Polygon',
-		subgraphId: 'protocol-v1-matic',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-matic',
 		coingeckoId: 'polygon-pos',
-	},
-	43113: {
-		id: 43113,
-		slug: 'avalanche-fuji',
-		name: 'Fuji (C-Chain)',
-		subgraphId: 'protocol-v1-avalanche-fuji',
-		coingeckoId: 'avalanche',
 	},
 	10: {
 		id: 10,
 		slug: 'optimism',
 		name: 'Optimism',
-		subgraphId: 'protocol-v1-optimism-mainnet',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-optimism-mainnet',
 		coingeckoId: 'optimistic-ethereum',
 	},
 	42161: {
 		id: 42161,
 		slug: 'arbitrum-one',
 		name: 'Arbitrum One',
-		subgraphId: 'protocol-v1-arbitrum-one',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-arbitrum-one',
 		coingeckoId: 'arbitrum-one',
 	},
 	43114: {
 		id: 43114,
 		slug: 'avalanche',
 		name: 'Avalanche C',
-		subgraphId: 'protocol-v1-avalanche-c',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-avalanche-c',
 		coingeckoId: 'avalanche',
 	},
 	56: {
 		id: 56,
 		slug: 'bsc',
 		name: 'BNB Smart Chain',
-		subgraphId: 'protocol-v1-bsc-mainnet',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-bsc-mainnet',
 		coingeckoId: 'binance-smart-chain',
 	},
 };
