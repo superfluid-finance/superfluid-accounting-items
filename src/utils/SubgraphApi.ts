@@ -99,7 +99,7 @@ async function queryStreamPeriodsRecursive(
 function getSubgraphClient(network: Network) {
 	return new ApolloClient({
 		link: new HttpLink({
-			uri: `https://api.thegraph.com/subgraphs/name/superfluid-finance/${network.subgraphId}`,
+			uri: network.subgraphUrl,
 			fetch,
 		}),
 		cache: new InMemoryCache(),

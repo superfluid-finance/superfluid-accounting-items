@@ -16,9 +16,6 @@ import {
  */
 
 export enum UnitOfTime {
-	Second = 1,
-	Minute = 60,
-	Hour = 3600,
 	Day = 86400,
 	Week = 604800,
 	Month = 2592000,
@@ -26,9 +23,6 @@ export enum UnitOfTime {
 }
 
 export const Interval = {
-	[UnitOfTime.Second]: 'every-second',
-	[UnitOfTime.Minute]: 'every-minute',
-	[UnitOfTime.Hour]: 'every-hour',
 	[UnitOfTime.Day]: 'daily',
 	[UnitOfTime.Week]: 'weekly',
 	[UnitOfTime.Month]: 'monthly',

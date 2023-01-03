@@ -1,8 +1,8 @@
-# Superfluid accounting items
+# Superfluid Accounting API
 
-Accounting items aims to process the streaming data to a format that's easier to consume for traditional accounting tools. It takes a StreamPeriod and divides it into amounts streamed grouped by calendar days (`dailyAmounts`). StreamPeriod represents a period in a Stream where the flowRate remains constant.
+Streams move value every second, but accounting tools don’t record value transfer on a real-time basis (typically it’s monthly). The Stream Accounting API can be used to represent your streams in a manner that’s consumable by your traditional accounting tools.
 
-All the timestamps used in the project are in UTC.
+More info about using the Accounting API can be found [here](https://superfluidhq.notion.site/Using-the-Stream-Accounting-API-3d161745acfe4750acf43c546f84c724)
 
 
 ## Running locally
@@ -12,7 +12,7 @@ All the timestamps used in the project are in UTC.
 yarn install
 ```
 
-2) Install netlify cli (more info at `https://docs.netlify.com/cli/get-started/`)
+2) Install netlify cli ([more info](https://docs.netlify.com/cli/get-started/))
 ```
 npm install netlify-cli -g
 ```
