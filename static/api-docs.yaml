@@ -41,13 +41,13 @@ components:
     Network:
       type: number
       enum:
+        - 1
+        - 10
+        - 56
         - 100
         - 137
-        - 43113
-        - 10
         - 42161
         - 43114
-        - 56
     Token:
       type: object
       properties:
