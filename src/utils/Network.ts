@@ -14,7 +14,7 @@ export const networks: { [any: number]: Network } = {
 		slug: 'ethereum',
 		name: 'Ethereum',
 		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-eth-mainnet',
-		coingeckoId: 'xdai',
+		coingeckoId: 'ethereum',
 	},
 	100: {
 		id: 100,
@@ -57,5 +57,13 @@ export const networks: { [any: number]: Network } = {
 		name: 'BNB Smart Chain',
 		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-bsc-mainnet',
 		coingeckoId: 'binance-smart-chain',
+	},
+	// For testing
+	5: {
+		id: 5,
+		slug: 'goerli',
+		name: 'Goerli',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-goerli',
+		coingeckoId: 'ethereum',
 	},
 };
