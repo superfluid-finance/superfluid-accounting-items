@@ -58,12 +58,4 @@ export const networks: { [any: number]: Network } = {
 		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-bsc-mainnet',
 		coingeckoId: 'binance-smart-chain',
 	},
-	// For testing
-	5: {
-		id: 5,
-		slug: 'goerli',
-		name: 'Goerli',
-		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-goerli',
-		coingeckoId: 'ethereum',
-	},
 };
