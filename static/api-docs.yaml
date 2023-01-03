@@ -10,17 +10,11 @@ components:
     UnitOfTime:
       type: number
       description:
-        Second = 1 |
-        Minute = 60 |
-        Hour = 3600 |
         Day = 86400 |
         Week = 604800 |
         Month = 2592000 |
         Year = 31536000
       enum:
-        - 1
-        - 60
-        - 3600
         - 86400
         - 604800
         - 2592000
@@ -129,6 +123,7 @@ paths:
         - in: query
           name: chains
           required: true
+          description: Number array for the Chain IDs you want to limit your accounting data to.
           schema:
             type: array
             example: '10,56,100,137'
@@ -138,6 +133,7 @@ paths:
           name: addresses
           required: true
           explode: false
+          description: The addresses array you’re getting accounting data for.
           schema:
             type: array
             example: '0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980,0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac'
@@ -146,33 +142,39 @@ paths:
         - in: query
           name: start
           required: true
+          description: The Unix timestamp where your accounting data is to start from.
           schema:
             type: number
             example: 1638309600
         - in: query
           name: end
           required: true
+          description: The Unix timestamp where your accounting data is to end.
           schema:
             type: number
             example: 1669845599
         - in: query
           name: priceGranularity
           required: true
+          description: When getting pricing data for each accounting record, you have the choice as to whether you want the instanteous price at the end of the timeframe of the accounting record or the average price over a certain lag from the end of the timeframe of the accounting record.
           schema:
             $ref: '#/components/schemas/UnitOfTime'
         - in: query
           name: virtualization
           required: true
+          description: The duration represented in each accounting record in your accounting data.
           schema:
             $ref: '#/components/schemas/UnitOfTime'
         - in: query
           name: currency
           required: true
+          description: The currency with which price data will be displayed in.
           schema:
             $ref: '#/components/schemas/Currency'
         - in: query
           name: counterparties
           explode: false
+          description: Addresses that are either sending or receiving streams from the addresses account(s) that you want to limit your accounting data to.
           schema:
             type: array
             example: 0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac,0x7269B0c7C831598465a9EB17F6c5a03331353dAF

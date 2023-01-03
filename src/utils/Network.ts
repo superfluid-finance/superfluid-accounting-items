@@ -59,10 +59,3 @@ export const networks: { [any: number]: Network } = {
 		coingeckoId: 'binance-smart-chain',
 	},
 };
-// 100 Gnosis Chain
-// 137 Polygon
-// 43113 Fuji (C-Chain)
-// 10 Optimism
-// 42161 Arbitrum One
-// 43114 Avalanche C
-// 56 BNB Smart Chain
