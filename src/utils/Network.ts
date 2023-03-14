@@ -44,6 +44,13 @@ export const networks: { [any: number]: Network } = {
 		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-arbitrum-one',
 		coingeckoId: 'arbitrum-one',
 	},
+	42220: {
+		id: 42220,
+		slug: 'celo',
+		name: 'Celo Mainnet',
+		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-celo-mainnet',
+		coingeckoId: 'celo',
+	},
 	43114: {
 		id: 43114,
 		slug: 'avalanche',

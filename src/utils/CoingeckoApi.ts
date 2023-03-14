@@ -22,6 +22,7 @@ export interface CoingeckoCoin {
 		'huobi-token'?: string;
 		'arbitrum-one'?: string;
 		'xdai'?: string;
+		'celo'?: string;
 	};
 }
 
