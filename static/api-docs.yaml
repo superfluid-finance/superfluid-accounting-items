@@ -47,6 +47,7 @@ components:
         - 100
         - 137
         - 42161
+        - 42220
         - 43114
     Token:
       type: object
