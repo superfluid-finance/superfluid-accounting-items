@@ -4,25 +4,28 @@ Streams move value every second, but accounting tools don’t record value trans
 
 More info about using the Accounting API can be found [here](https://superfluidhq.notion.site/Using-the-Stream-Accounting-API-3d161745acfe4750acf43c546f84c724)
 
-
 ## Running locally
 
-1) Install node modules:
+1. Install node modules:
+
 ```
 yarn install
 ```
 
-2) Install netlify cli ([more info](https://docs.netlify.com/cli/get-started/))
+2. Install netlify cli ([more info](https://docs.netlify.com/cli/get-started/))
+
 ```
 npm install netlify-cli -g
 ```
 
-3) Run netlify
+3. Run netlify
+
 ```
 netlify dev
 ```
 
-4) Local server will start at
+4. Local server will start at
+
 ```
 http://localhost:8888
 ```
@@ -45,11 +48,13 @@ http://localhost:8888
 `counterparties` - **string** (addresses separated by comma). This field is optional. If no counterparties are provided, everyone will be selected <br />
 
 **Example request**
+
 ```
-https://accounting.superfluid.dev/v1/stream-periods?addresses=0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980&chains=100%2C137%2C10%2C42161%2C43114%2C56&start=1638309600&end=1669845599&priceGranularity=86400&virtualization=2592000&currency=USD&counterparties=0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac%2C0x7269B0c7C831598465a9EB17F6c5a03331353dAF
+https://accounting.superfluid.dev/v1/stream-periods?addresses=0xe38ffDD2B0B8bb7E93D409f4A282714b18B77980&chains=100%2C137%2C10%2C42161%2C42220%2C43114%2C56&start=1638309600&end=1669845599&priceGranularity=86400&virtualization=2592000&currency=USD&counterparties=0x7BDa037dFdf9CD9Ad261D27f489924aebbcE71Ac%2C0x7269B0c7C831598465a9EB17F6c5a03331353dAF
 ```
 
-*UnitOfTime* (use numerical value)
+_UnitOfTime_ (use numerical value)
+
 ```
 Second = 1
 Minute = 60
@@ -60,7 +65,8 @@ Month = 2592000
 Year = 31536000
 ```
 
-*Supported currencies:*
+_Supported currencies:_
+
 ```
 USD
 EUR
