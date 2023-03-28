@@ -7,18 +7,13 @@ servers:
 openapi: 3.0.0
 components:
   schemas:
-    UnitOfTime:
-      type: number
-      description:
-        Day = 86400 |
-        Week = 604800 |
-        Month = 2628000 |
-        Year = 31536000
+    VirtualizationPeriod:
+      type: string
       enum:
-        - 86400
-        - 604800
-        - 2628000
-        - 31536000
+        - day
+        - week
+        - month
+        - year
     Currency:
       type: string
       enum:
@@ -159,13 +154,13 @@ paths:
           required: true
           description: When getting pricing data for each accounting record, you have the choice as to whether you want the instanteous price at the end of the timeframe of the accounting record or the average price over a certain lag from the end of the timeframe of the accounting record.
           schema:
-            $ref: '#/components/schemas/UnitOfTime'
+            $ref: '#/components/schemas/VirtualizationPeriod'
         - in: query
           name: virtualization
           required: true
           description: The duration represented in each accounting record in your accounting data.
           schema:
-            $ref: '#/components/schemas/UnitOfTime'
+            $ref: '#/components/schemas/VirtualizationPeriod'
         - in: query
           name: currency
           required: true

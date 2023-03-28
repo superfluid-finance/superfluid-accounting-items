@@ -1,6 +1,6 @@
 import { getVirtualizedStreamPeriods } from '../services/StreamPeriodsService';
 import { CurrencyCode } from '../utils/CurrencyUtils';
-import { UnitOfTime } from '../utils/DateUtils';
+import { UnitOfTime, VirtualizationPeriod, VirtualizationUnitOfTimeMap } from '../utils/DateUtils';
 import { networks } from '../utils/Network';
 
 import { Event } from '@netlify/functions/dist/function/event';
@@ -23,8 +23,8 @@ export const AccountingQuery = z.object({
 		.refine((addresses) => addresses.length > 0, 'At least one address is required!'),
 	start: z.preprocess((start) => Number(start), z.number()),
 	end: z.preprocess((end) => Number(end), z.number()),
-	priceGranularity: z.preprocess((priceGranularity) => Number(priceGranularity), z.nativeEnum(UnitOfTime)),
-	virtualization: z.preprocess((virtualization) => Number(virtualization), z.nativeEnum(UnitOfTime)),
+	priceGranularity: z.nativeEnum(VirtualizationPeriod),
+	virtualization: z.nativeEnum(VirtualizationPeriod),
 	currency: z.nativeEnum(CurrencyCode),
 	counterparties: z.string().optional().default('').transform(parseAddressesString),
 });
@@ -39,10 +39,10 @@ export const handler = async (event: Event) => {
 			chains,
 			Number(start),
 			Number(end),
-			Number(virtualization) as UnitOfTime,
+			VirtualizationUnitOfTimeMap[virtualization],
 			counterparties,
 			currency as CurrencyCode,
-			Number(priceGranularity) as UnitOfTime,
+			VirtualizationUnitOfTimeMap[priceGranularity],
 		);
 
 		return {
