@@ -11,14 +11,20 @@ import {
 	startOfYear,
 } from 'date-fns';
 
+export enum VirtualizationPeriod {
+	Day = 'day',
+	Week = 'week',
+	Month = 'month',
+	Year = 'year',
+}
+
 /**
  * Enum numerical value is expressed in seconds.
  */
-
 export enum UnitOfTime {
 	Day = 86400,
 	Week = 604800,
-	Month = 2592000,
+	Month = 2628000,
 	Year = 31536000,
 }
 
@@ -27,6 +33,13 @@ export const Interval = {
 	[UnitOfTime.Week]: 'weekly',
 	[UnitOfTime.Month]: 'monthly',
 	[UnitOfTime.Year]: 'yearly',
+};
+
+export const VirtualizationUnitOfTimeMap = {
+	[VirtualizationPeriod.Day]: UnitOfTime.Day,
+	[VirtualizationPeriod.Week]: UnitOfTime.Week,
+	[VirtualizationPeriod.Month]: UnitOfTime.Month,
+	[VirtualizationPeriod.Year]: UnitOfTime.Year,
 };
 
 export function getEndOfPeriodTimestamp(timestamp: number, period: UnitOfTime) {
