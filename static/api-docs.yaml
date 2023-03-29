@@ -1,5 +1,5 @@
 info:
-  version: 1.0.0
+  version: 0.2.0
   title: Superfluid Accounting API
   description: Simple API to fetch all stream data needed for accounting.
 servers:
