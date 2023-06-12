@@ -10,6 +10,7 @@ components:
     VirtualizationPeriod:
       type: string
       enum:
+        - hour
         - day
         - week
         - month

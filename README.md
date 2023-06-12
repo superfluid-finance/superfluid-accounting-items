@@ -39,8 +39,8 @@ http://localhost:8888
 `addresses` - **string** (addresses separated by comma) <br />
 `start` - **number** (unix timestamp) <br />
 `end` - **number** (unix timestamp) <br />
-`priceGranularity` - **VirtualizationPeriod** day, week, month or year period <br />
-`virtualization` - **VirtualizationPeriod** day, week, month or year period <br />
+`priceGranularity` - **VirtualizationPeriod** hour, day, week, month or year period <br />
+`virtualization` - **VirtualizationPeriod** hour, day, week, month or year period <br />
 `currency` - **CurrencyCode** (ISO 3-Letter Currency Code) <br />
 `counterparties` - **string** (addresses separated by comma). This field is optional. If no counterparties are provided, everyone will be selected <br />
 
@@ -51,6 +51,7 @@ https://accounting.superfluid.dev/v1/stream-periods?addresses=0xe38ffDD2B0B8bb7E
 
 *VirtualizationPeriod*
 ```
+hour
 day
 week
 month
