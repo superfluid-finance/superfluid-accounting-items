@@ -51,7 +51,7 @@ https://accounting.superfluid.dev/v1/stream-periods?addresses=0xe38ffDD2B0B8bb7E
 
 *VirtualizationPeriod*
 ```
-hour
+hour (Use at risk! This can fail due to too large response. Try using smaller timeframe or single address.)
 day
 week
 month
