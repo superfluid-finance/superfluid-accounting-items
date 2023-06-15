@@ -32,14 +32,6 @@ export enum UnitOfTime {
 	Year = 31536000,
 }
 
-export const Interval = {
-	[UnitOfTime.Hour]: 'hourly',
-	[UnitOfTime.Day]: 'daily',
-	[UnitOfTime.Week]: 'weekly',
-	[UnitOfTime.Month]: 'monthly',
-	[UnitOfTime.Year]: 'yearly',
-};
-
 export const VirtualizationUnitOfTimeMap = {
 	[VirtualizationPeriod.Hour]: UnitOfTime.Hour,
 	[VirtualizationPeriod.Day]: UnitOfTime.Day,
