@@ -1,17 +1,20 @@
 import {
 	endOfDay,
+	endOfHour,
 	endOfMonth,
 	endOfWeek,
 	endOfYear,
 	fromUnixTime,
 	getUnixTime,
 	startOfDay,
+	startOfHour,
 	startOfMonth,
 	startOfWeek,
 	startOfYear,
 } from 'date-fns';
 
 export enum VirtualizationPeriod {
+	Hour = 'hour',
 	Day = 'day',
 	Week = 'week',
 	Month = 'month',
@@ -22,6 +25,7 @@ export enum VirtualizationPeriod {
  * Enum numerical value is expressed in seconds.
  */
 export enum UnitOfTime {
+	Hour = 3600,
 	Day = 86400,
 	Week = 604800,
 	Month = 2628000,
@@ -29,6 +33,7 @@ export enum UnitOfTime {
 }
 
 export const Interval = {
+	[UnitOfTime.Hour]: 'hourly',
 	[UnitOfTime.Day]: 'daily',
 	[UnitOfTime.Week]: 'weekly',
 	[UnitOfTime.Month]: 'monthly',
@@ -36,6 +41,7 @@ export const Interval = {
 };
 
 export const VirtualizationUnitOfTimeMap = {
+	[VirtualizationPeriod.Hour]: UnitOfTime.Hour,
 	[VirtualizationPeriod.Day]: UnitOfTime.Day,
 	[VirtualizationPeriod.Week]: UnitOfTime.Week,
 	[VirtualizationPeriod.Month]: UnitOfTime.Month,
@@ -49,6 +55,8 @@ export function getEndOfPeriodTimestamp(timestamp: number, period: UnitOfTime) {
 
 export function getEndOfPeriod(date: Date, period: UnitOfTime) {
 	switch (period) {
+		case UnitOfTime.Hour:
+			return endOfHour(date);
 		case UnitOfTime.Day:
 			return endOfDay(date);
 		case UnitOfTime.Week:
@@ -64,6 +72,8 @@ export function getEndOfPeriod(date: Date, period: UnitOfTime) {
 
 export function getStartOfPeriod(date: Date, period: UnitOfTime) {
 	switch (period) {
+		case UnitOfTime.Hour:
+			return startOfHour(date);
 		case UnitOfTime.Day:
 			return startOfDay(date);
 		case UnitOfTime.Week:

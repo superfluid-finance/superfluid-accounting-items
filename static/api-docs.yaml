@@ -10,6 +10,7 @@ components:
     VirtualizationPeriod:
       type: string
       enum:
+        - hour
         - day
         - week
         - month
@@ -158,7 +159,7 @@ paths:
         - in: query
           name: virtualization
           required: true
-          description: The duration represented in each accounting record in your accounting data.
+          description: The duration represented in each accounting record in your accounting data. (NB! Please use hourly period with small timeframe or single sender/receiver address.)
           schema:
             $ref: '#/components/schemas/VirtualizationPeriod'
         - in: query
