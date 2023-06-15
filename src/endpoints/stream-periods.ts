@@ -1,3 +1,4 @@
+import { getUnixTime, sub } from 'date-fns';
 import { getVirtualizedStreamPeriods } from '../services/StreamPeriodsService';
 import { CurrencyCode } from '../utils/CurrencyUtils';
 import { VirtualizationPeriod, VirtualizationUnitOfTimeMap } from '../utils/DateUtils';
@@ -33,6 +34,20 @@ export const handler = async (event: Event) => {
 	try {
 		const { chains, addresses, start, end, virtualization, currency, priceGranularity, counterparties } =
 			AccountingQuery.parse(event.queryStringParameters);
+
+		// Hourly price granularity can not be used with data older than 90 days.
+		// This is currently a limitation by CoinGecko API we are using.
+		// More info here: https://www.coingecko.com/en/api/documentation
+		if (
+			start &&
+			priceGranularity === VirtualizationPeriod.Hour &&
+			getUnixTime(sub(new Date(), { days: 89, hours: 23, minutes: 59 })) > start
+		) {
+			return {
+				statusCode: 400,
+				body: 'Hourly price granularity can not be used with data older than 90 days.',
+			};
+		}
 
 		const virtualizedStreamPeriods = await getVirtualizedStreamPeriods(
 			addresses,

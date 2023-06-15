@@ -3,7 +3,7 @@ import { fromUnixTime, getUnixTime } from 'date-fns';
 import groupBy from 'lodash/fp/groupBy';
 import { NetworkToken } from '../services/TokenPriceService';
 import { CurrencyCode } from './CurrencyUtils';
-import { getStartOfPeriod, Interval, UnitOfTime } from './DateUtils';
+import { UnitOfTime, getStartOfPeriod } from './DateUtils';
 
 export interface CoingeckoCoin {
 	id: string;
@@ -62,7 +62,6 @@ export async function fetchCoinPricesByGranularity(
 		vs_currency: currency,
 		from: startTimestamp.toString(),
 		to: endTimestamp.toString(),
-		interval: Interval[priceGranularity],
 	});
 
 	return fetch(`${process.env.COINGECKO_API_URL}/api/v3/coins/${token.coingeckoId}/market_chart/range?${query}`)
