@@ -1,7 +1,7 @@
 import { getUnixTime, sub } from 'date-fns';
 import { getVirtualizedStreamPeriods } from '../services/StreamPeriodsService';
 import { CurrencyCode } from '../utils/CurrencyUtils';
-import { UnitOfTime, VirtualizationPeriod, VirtualizationUnitOfTimeMap } from '../utils/DateUtils';
+import { VirtualizationPeriod, VirtualizationUnitOfTimeMap } from '../utils/DateUtils';
 import { networks } from '../utils/Network';
 
 import { Event } from '@netlify/functions/dist/function/event';
