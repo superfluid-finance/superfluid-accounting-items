@@ -23,6 +23,7 @@ export interface CoingeckoCoin {
 		'arbitrum-one'?: string;
 		'xdai'?: string;
 		'celo'?: string;
+		'base'?: string;
 	};
 }
 
