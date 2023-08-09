@@ -67,7 +67,7 @@ export const networks: { [any: number]: Network } = {
 	},
 	8453: {
 		id: 8453,
-		slug: 'bsc',
+		slug: 'base',
 		name: 'Base',
 		subgraphUrl: 'https://base-mainnet.subgraph.x.superfluid.dev/',
 		coingeckoId: 'base',
