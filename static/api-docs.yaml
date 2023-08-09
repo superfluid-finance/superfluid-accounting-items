@@ -45,6 +45,7 @@ components:
         - 42161
         - 42220
         - 43114
+        - 8453
     Token:
       type: object
       properties:
