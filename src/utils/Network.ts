@@ -65,4 +65,11 @@ export const networks: { [any: number]: Network } = {
 		subgraphUrl: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-bsc-mainnet',
 		coingeckoId: 'binance-smart-chain',
 	},
+	8453: {
+		id: 8453,
+		slug: 'bsc',
+		name: 'Base',
+		subgraphUrl: 'https://base-mainnet.subgraph.x.superfluid.dev/',
+		coingeckoId: 'ethereum',
+	},
 };
