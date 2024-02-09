@@ -72,4 +72,11 @@ export const networks: { [any: number]: Network } = {
 		subgraphUrl: 'https://base-mainnet.subgraph.x.superfluid.dev/',
 		coingeckoId: 'base',
 	},
+	534352: {
+		id: 534352,
+		slug: 'scroll',
+		name: 'Scroll',
+		subgraphUrl: 'https://scroll-mainnet.subgraph.x.superfluid.dev/',
+		coingeckoId: 'scroll',
+	},
 };
