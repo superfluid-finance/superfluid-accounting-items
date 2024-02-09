@@ -24,6 +24,7 @@ export interface CoingeckoCoin {
 		'xdai'?: string;
 		'celo'?: string;
 		'base'?: string;
+		'scroll'?: string;
 	};
 }
 
