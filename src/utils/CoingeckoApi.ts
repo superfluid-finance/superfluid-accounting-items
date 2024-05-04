@@ -26,6 +26,7 @@ export interface CoingeckoCoin {
 		'base'?: string;
 		'scroll'?: string;
 		'optimism-sepolia'?: string;
+		'degen'?: string;
 	};
 }
 

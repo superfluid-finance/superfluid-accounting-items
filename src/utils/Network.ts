@@ -86,4 +86,11 @@ export const networks: { [any: number]: Network } = {
 		subgraphUrl: 'https://optimism-sepolia.subgraph.x.superfluid.dev/',
 		coingeckoId: 'optimism-sepolia',
 	},
+	666666666 : {
+		id: 666666666,
+		slug: 'degen',
+		name: 'Degen Chain',
+		subgraphUrl: 'https://degenchain.subgraph.x.superfluid.dev/',
+		coingeckoId: 'degen',
+	},
 };
