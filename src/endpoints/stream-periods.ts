@@ -3,8 +3,8 @@ import { getVirtualizedStreamPeriods } from '../services/StreamPeriodsService';
 import { CurrencyCode } from '../utils/CurrencyUtils';
 import { VirtualizationPeriod, VirtualizationUnitOfTimeMap } from '../utils/DateUtils';
 import { networks } from '../utils/Network';
+import { HandlerEvent } from "@netlify/functions"
 
-import { Event } from '@netlify/functions/dist/function/event';
 import { z } from 'zod';
 
 const parseAddressesString = (addresses: string): Array<string> =>
@@ -30,7 +30,7 @@ export const AccountingQuery = z.object({
 	counterparties: z.string().optional().default('').transform(parseAddressesString),
 });
 
-export const handler = async (event: Event) => {
+export const handler = async (event: HandlerEvent) => {
 	try {
 		const { chains, addresses, start, end, virtualization, currency, priceGranularity, counterparties } =
 			AccountingQuery.parse(event.queryStringParameters);

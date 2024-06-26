@@ -12,20 +12,17 @@ More info about using the Accounting API can be found [here](https://superfluidh
 yarn install
 ```
 
-2) Install netlify cli ([more info](https://docs.netlify.com/cli/get-started/))
+2) Run netlify
 ```
-npm install netlify-cli -g
-```
-
-3) Run netlify
-```
-netlify dev
+yarn dev
 ```
 
-4) Local server will start at
+3) Local server will start at
 ```
 http://localhost:8888
 ```
+
+NOTE: The swagger is hard-coded to the production URL.
 
 ## API endpoints
 
