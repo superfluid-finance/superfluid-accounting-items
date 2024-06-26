@@ -4,7 +4,6 @@ Streams move value every second, but accounting tools don’t record value trans
 
 More info about using the Accounting API can be found [here](https://superfluidhq.notion.site/Using-the-Stream-Accounting-API-3d161745acfe4750acf43c546f84c724)
 
-
 ## Running locally
 
 1) Install node modules:
@@ -12,20 +11,17 @@ More info about using the Accounting API can be found [here](https://superfluidh
 yarn install
 ```
 
-2) Install netlify cli ([more info](https://docs.netlify.com/cli/get-started/))
+2) Run netlify
 ```
-npm install netlify-cli -g
-```
-
-3) Run netlify
-```
-netlify dev
+yarn dev
 ```
 
-4) Local server will start at
+3) Local server will start at
 ```
 http://localhost:8888
 ```
+
+NOTE: The swagger is hard-coded to the production URL.
 
 ## API endpoints
 

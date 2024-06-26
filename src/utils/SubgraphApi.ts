@@ -1,5 +1,4 @@
-import { NormalizedCacheObject } from '@apollo/client';
-import { ApolloClient, DocumentNode, gql, HttpLink, InMemoryCache } from '@apollo/client/core';
+import { ApolloClient, DocumentNode, gql, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client/core';
 import fetch from 'cross-fetch';
 import { Network } from './Network';
 import { Address, StreamPeriodResult } from './Types';
