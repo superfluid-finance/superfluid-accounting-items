@@ -4,7 +4,6 @@ Streams move value every second, but accounting tools don’t record value trans
 
 More info about using the Accounting API can be found [here](https://superfluidhq.notion.site/Using-the-Stream-Accounting-API-3d161745acfe4750acf43c546f84c724)
 
-
 ## Running locally
 
 1) Install node modules:
