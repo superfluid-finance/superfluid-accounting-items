@@ -55,7 +55,7 @@ export const networks: { [any: number]: Network } = {
 		id: 43114,
 		slug: 'avalanche',
 		name: 'Avalanche C',
-		subgraphUrl: 'https://avalance-c.subgraph.x.superfluid.dev/',
+		subgraphUrl: 'https://api.goldsky.com/api/public/project_clsnd6xsoma5j012qepvucfpp/subgraphs/protocol-v1-avalanche-c/prod/gn',
 		coingeckoId: 'avalanche',
 	},
 	56: {
