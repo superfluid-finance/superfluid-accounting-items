@@ -1,5 +1,6 @@
-import { ApolloClient, DocumentNode, gql, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client/core';
+import { ApolloClient, createHttpLink, DocumentNode, gql, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client/core';
 import fetch from 'cross-fetch';
+import { Agent } from 'https';
 import { Network } from './Network';
 import { Address, StreamPeriodResult } from './Types';
 
@@ -97,9 +98,12 @@ async function queryStreamPeriodsRecursive(
 
 function getSubgraphClient(network: Network) {
 	return new ApolloClient({
-		link: new HttpLink({
+		link: createHttpLink({
 			uri: network.subgraphUrl,
 			fetch,
+			fetchOptions: {
+				agent: new Agent({ rejectUnauthorized: false }), // To fix "Hostname/IP does not match certificate's altnames" issue
+			},
 		}),
 		cache: new InMemoryCache(),
 	});
