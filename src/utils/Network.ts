@@ -79,25 +79,11 @@ export const networks: { [any: number]: Network } = {
 		subgraphUrl: 'https://scroll-mainnet.subgraph.x.superfluid.dev/',
 		coingeckoId: 'scroll',
 	},
-	11155420: {
-		id: 11155420,
-		slug: 'optimism-sepolia',
-		name: 'Optimism Sepolia',
-		subgraphUrl: 'https://optimism-sepolia.subgraph.x.superfluid.dev/',
-		coingeckoId: 'optimism-sepolia',
-	},
 	666666666 : {
 		id: 666666666,
 		slug: 'degen',
 		name: 'Degen Chain',
 		subgraphUrl: 'https://degenchain.subgraph.x.superfluid.dev/',
-		coingeckoId: 'degen',
-	},
-	84532 : {
-		id: 84532,
-		slug: 'base-sepolia',
-		name: 'Base Sepolia',
-		subgraphUrl: 'https://base-sepolia.subgraph.x.superfluid.dev/',
 		coingeckoId: 'degen',
 	},
 };
