@@ -7,15 +7,15 @@ export interface Token {
 	underlyingAddress: Address;
 }
 
-interface GraphqlType {
+export interface GraphqlType {
 	__typename: string;
 }
 
 export interface StreamPeriodResult extends GraphqlType {
 	id: string;
+	chainId: number;
 	flowRate: string;
 	token: Token & GraphqlType;
-	chainId: number;
 	sender: {
 		id: Address;
 	};
@@ -33,6 +33,26 @@ export interface StreamPeriodResult extends GraphqlType {
 		transactionHash: string;
 	};
 	totalAmountStreamed: string;
+}
+
+export interface TransferEventResult extends GraphqlType {
+	id: string;
+	chainId: number;
+	value: string;
+	token: Address;
+	from: {
+		id: Address;
+	};
+	to: {
+		id: Address;
+	};
+	timestamp: number;
+	blockNumber: number;
+	transactionHash: string;
+}
+
+export interface TransferEventResultWithToken extends Omit<TransferEventResult, 'token'> {
+	token: Token & GraphqlType;
 }
 
 export interface StreamPeriod {
