@@ -6,10 +6,11 @@ import { TimespanPrice } from '../utils/CoingeckoApi';
 import { CurrencyCode } from '../utils/CurrencyUtils';
 import { getEndOfPeriodTimestamp, UnitOfTime } from '../utils/DateUtils';
 import { Network } from '../utils/Network';
-import { queryStreamPeriods } from '../utils/SubgraphApi';
-import { Address, StreamPeriod, StreamPeriodResult, VirtualStreamPeriod } from '../utils/Types';
+import { queryStreamPeriods as queryStreamPeriodsAndTransfers } from '../utils/SubgraphApi';
+import { Address, StreamPeriod, StreamPeriodResult, Token, TransferEventResult, TransferEventResultWithToken, VirtualStreamPeriod } from '../utils/Types';
 import { getTokensPrices, NetworkToken } from './TokenPriceService';
 import maxBy from 'lodash/fp/maxBy';
+import { uniqBy } from 'lodash';
 
 export async function getVirtualizedStreamPeriods(
 	addresses: Address[],
@@ -22,14 +23,16 @@ export async function getVirtualizedStreamPeriods(
 	priceGranularity: UnitOfTime,
 ): Promise<StreamPeriod[]> {
 	// Fetch all stream periods
-	const networksStreamPeriods = await Promise.all(
+	const networksStreamPeriodsAndTransfers = await Promise.all(
 		networks.map((network) =>
-			queryStreamPeriods(addresses, network, startTimestamp, endTimestamp, counterpartyAddresses),
+			queryStreamPeriodsAndTransfers(addresses, network, startTimestamp, endTimestamp, counterpartyAddresses),
 		),
 	);
 
-	const streamPeriods = flatten(networksStreamPeriods);
-	const uniqueTokens = getUniqueNetworkTokenAddresses(streamPeriods);
+	const streamPeriods = flatten(networksStreamPeriodsAndTransfers.map(({ streamPeriods }) => streamPeriods));
+	const transfers = flatten(networksStreamPeriodsAndTransfers.map(({ transfers }) => transfers));
+
+	const uniqueTokens = getUniqueNetworkTokenAddresses({ streamPeriods, transfers });
 	const tokensWithPriceData = await getTokensPrices(
 		uniqueTokens,
 		currency,
@@ -38,8 +41,25 @@ export async function getVirtualizedStreamPeriods(
 		endTimestamp,
 	);
 
+	const transfersAsStreamPeriods: StreamPeriodResult[] = transfers.map((transfer) => ({
+		...transfer,
+		flowRate: "0",
+		startedAtTimestamp: transfer.timestamp,
+		startedAtBlockNumber: transfer.blockNumber,
+		stoppedAtTimestamp: transfer.timestamp,
+		startedAtEvent: {
+			transactionHash: transfer.transactionHash,
+		},
+		chainId: transfer.chainId,
+		sender: transfer.from,
+		receiver: transfer.to,
+		totalAmountStreamed: transfer.value
+	}));
+
+	const streamPeriodsAndTransfers = [...streamPeriods, ...transfersAsStreamPeriods];
+
 	// Map stream periods into virtualized periods based on conf
-	return streamPeriods.map((streamPeriod) => {
+	const virtualizedStreamPeriods = streamPeriodsAndTransfers.map((streamPeriod) => {
 		const tokenPriceData = tokensWithPriceData.find(
 			(tokenWithPriceData) =>
 				tokenWithPriceData.chainId === streamPeriod.chainId &&
@@ -57,6 +77,8 @@ export async function getVirtualizedStreamPeriods(
 
 		return mapStreamPeriodResult(streamPeriod, virtualPeriods);
 	});
+
+	return virtualizedStreamPeriods;
 }
 
 function mapStreamPeriodResult(streamPeriod: StreamPeriodResult, virtualPeriods: VirtualStreamPeriod[]) {
@@ -142,13 +164,19 @@ function getAmountInTimespan(startTimestamp: number, endTimestamp: number, flowR
 	return new Decimal(flowRate).mul(new Decimal(endTimestamp - startTimestamp));
 }
 
-function getUniqueNetworkTokenAddresses(streamPeriods: StreamPeriodResult[]): NetworkToken[] {
+function getUniqueNetworkTokenAddresses({ streamPeriods, transfers }: { streamPeriods: StreamPeriodResult[], transfers: TransferEventResultWithToken[] }): NetworkToken[] {
+	const allTokens = uniqBy([
+		...streamPeriods.map((streamPeriod) => ({ ...streamPeriod.token, chainId: streamPeriod.chainId })),
+		...transfers.map((transfer) => ({ ...transfer.token, chainId: transfer.chainId }))
+	], x => `${x.chainId}-${x.id}`);
+
 	return Object.values(
-		streamPeriods.reduce((tokens, streamPeriod) => {
+		allTokens.reduce((tokens, token) => {
 			const {
 				chainId,
-				token: { id, underlyingAddress },
-			} = streamPeriod;
+				id,
+				underlyingAddress,
+			} = token;
 
 			// TODO: If no underlyingAddress then it is native super token?
 			return {

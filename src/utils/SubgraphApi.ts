@@ -2,13 +2,16 @@ import { ApolloClient, createHttpLink, DocumentNode, gql, HttpLink, InMemoryCach
 import fetch from 'cross-fetch';
 import { Agent } from 'https';
 import { Network } from './Network';
-import { Address, StreamPeriodResult } from './Types';
+import { Address, GraphqlType, StreamPeriodResult, Token, TransferEventResult, TransferEventResultWithToken } from './Types';
+import { uniq } from 'lodash';
 
 export interface StreamPeriodsResults {
 	inflowingStreamPeriods: StreamPeriodResult[];
 	outflowingStreamPeriods: StreamPeriodResult[];
 	inflowingActiveStreamPeriods: StreamPeriodResult[];
 	outflowingActiveStreamPeriods: StreamPeriodResult[];
+	outgoingTransfers: TransferEventResult[];
+	incomingTransfers: TransferEventResult[];
 }
 
 interface StreamPeriodVariables {
@@ -27,18 +30,39 @@ export async function queryStreamPeriods(
 	startTimestamp: number,
 	endTimestamp: number,
 	counterpartyAddresses: Address[],
-): Promise<StreamPeriodResult[]> {
+): Promise<{ streamPeriods: StreamPeriodResult[], transfers: TransferEventResultWithToken[] }> {
 	const client = getSubgraphClient(network);
 	const query =
 		counterpartyAddresses.length > 0 ? streamPeriodsQueryWithCounterparty : streamPeriodsQueryWithoutCounterparty;
 
-	return queryStreamPeriodsRecursive(
+	const { streamPeriods, transfers } = await queryStreamPeriodsRecursive(
 		{ network, addresses, from: startTimestamp, to: endTimestamp, counterpartyAddresses, first: 1000, skip: 0 },
 		query,
 		client,
 		[],
+		[],
 		0,
 	);
+
+	const transferTokens = uniq(transfers.map(transfer => transfer.token));
+
+	const tokenQueryVariables = { tokens: transferTokens };
+	const { data: tokenData } = await client.query<
+		{ tokens: (Token & GraphqlType)[] }
+	>({
+		query: tokenQuery,
+		variables: tokenQueryVariables,
+	}).catch((e) => {
+		console.error(`Failed to fetch tokens ${network.name} subgraph`, tokenQueryVariables, e);
+		throw e;
+	});;
+
+	const allTransfersWithTokens = transfers.map(transfer => ({
+		...transfer,
+		token: tokenData.tokens.find((token) => token.id === transfer.token)!,
+	}));
+
+	return { streamPeriods, transfers: allTransfersWithTokens };
 }
 
 async function queryStreamPeriodsRecursive(
@@ -46,10 +70,11 @@ async function queryStreamPeriodsRecursive(
 	query: DocumentNode,
 	client: ApolloClient<NormalizedCacheObject>,
 	streamPeriods: Array<StreamPeriodResult>,
+	transfers: Array<TransferEventResult>,
 	currentPage: number,
-): Promise<StreamPeriodResult[]> {
+): Promise<{ streamPeriods: StreamPeriodResult[], transfers: TransferEventResult[] }> {
 	const response = await client
-		.query({
+		.query<StreamPeriodsResults>({
 			variables,
 			query,
 		})
@@ -63,6 +88,8 @@ async function queryStreamPeriodsRecursive(
 		outflowingStreamPeriods,
 		inflowingActiveStreamPeriods,
 		outflowingActiveStreamPeriods,
+		incomingTransfers,
+		outgoingTransfers,
 	} = response.data;
 
 	const fetchedStreamPeriods = [
@@ -75,13 +102,24 @@ async function queryStreamPeriodsRecursive(
 		chainId: variables.network.id,
 	}));
 
+	const fetchedTransfers = [
+		...incomingTransfers,
+		...outgoingTransfers,
+	].map((transfer) => ({
+		...transfer,
+		chainId: variables.network.id,
+	}));
+
 	const allStreamPeriods = streamPeriods.concat(fetchedStreamPeriods);
+	const allTransfers = transfers.concat(fetchedTransfers);
 
 	if (
 		inflowingStreamPeriods.length >= variables.first ||
 		outflowingStreamPeriods.length >= variables.first ||
 		inflowingActiveStreamPeriods.length >= variables.first ||
-		outflowingActiveStreamPeriods.length >= variables.first
+		outflowingActiveStreamPeriods.length >= variables.first ||
+		incomingTransfers.length >= variables.first ||
+		outgoingTransfers.length >= variables.first
 	) {
 		const { skip, first, ...nextVariables } = variables;
 		return queryStreamPeriodsRecursive(
@@ -89,11 +127,12 @@ async function queryStreamPeriodsRecursive(
 			query,
 			client,
 			allStreamPeriods,
+			allTransfers,
 			currentPage + 1,
 		);
 	}
 
-	return allStreamPeriods;
+	return { streamPeriods: allStreamPeriods, transfers: allTransfers };
 }
 
 function getSubgraphClient(network: Network) {
@@ -114,10 +153,7 @@ fragment periodFields on StreamPeriod {
 	id
 	flowRate
 	token {
-		id
-		symbol
-		name
-		underlyingAddress
+		...tokenFields
 	}
 	sender {
 		id
@@ -137,6 +173,42 @@ fragment periodFields on StreamPeriod {
 	}
 	totalAmountStreamed
 }
+`;
+
+const TransferFields = `
+	fragment transferFields on TransferEvent {
+		id
+		value
+		token
+		from {
+			id
+		}
+		to {
+			id
+		}
+		timestamp
+		blockNumber
+		transactionHash
+	}
+`;
+
+const TokenFields = `
+	fragment tokenFields on Token {
+		id
+		symbol
+		name
+		underlyingAddress
+	}
+`;
+
+const tokenQuery = gql`
+	query GetTokens($tokens: [ID!]!) {
+		tokens(where: { id_in: $tokens }) {
+			...tokenFields
+		}
+	}
+	
+	${TokenFields}
 `;
 
 const streamPeriodsQueryWithCounterparty = gql`
@@ -196,9 +268,33 @@ const streamPeriodsQueryWithCounterparty = gql`
 		) {
 			...periodFields
 		}
+		incomingTransfers: transferEvents(
+			first: $first
+			skip: $skip
+			where: {
+				to_in: $addresses
+				from_in: $counterpartyAddresses
+			}
+		) {
+			...transferFields
+		}
+		outgoingTransfers: transferEvents(
+			first: $first
+			skip: $skip
+			where: {
+				timestamp_lt: $to
+				timestamp_gte: $from
+				to_in: $counterpartyAddresses
+				from_in: $addresses
+			}
+		) {
+			...transferFields
+		}
 	}
 
 	${StreamPeriodFields}
+	${TransferFields}
+	${TokenFields}
 `;
 
 const streamPeriodsQueryWithoutCounterparty = gql`
@@ -238,7 +334,23 @@ const streamPeriodsQueryWithoutCounterparty = gql`
 		) {
 			...periodFields
 		}
+		incomingTransfers: transferEvents(
+			first: $first, 
+			skip: $skip
+			where: { timestamp_lt: $to, timestamp_gte: $from, to_in: $addresses, from_in: $counterpartyAddresses }
+		) {
+			...transferFields
+		}
+		outgoingTransfers: transferEvents(
+			first: $first, 
+			skip: $skip
+			where: { timestamp_lt: $to, timestamp_gte: $from, to_in: $counterpartyAddresses, from_in: $addresses }
+		) {
+			...transferFields
+		}
 	}
 
 	${StreamPeriodFields}
+	${TransferFields}
+	${TokenFields}
 `;
