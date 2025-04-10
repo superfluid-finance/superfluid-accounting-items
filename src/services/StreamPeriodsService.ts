@@ -44,15 +44,19 @@ export async function getVirtualizedStreamPeriods(
 	const transfersAsStreamPeriods: StreamPeriodResult[] = transfers.map((transfer) => ({
 		...transfer,
 		flowRate: "0",
-		startedAtTimestamp: transfer.timestamp,
-		startedAtBlockNumber: transfer.blockNumber,
-		stoppedAtTimestamp: transfer.timestamp,
-		startedAtEvent: {
-			transactionHash: transfer.transactionHash,
-		},
 		chainId: transfer.chainId,
 		sender: transfer.from,
 		receiver: transfer.to,
+		startedAtTimestamp: transfer.timestamp,
+		startedAtBlockNumber: transfer.blockNumber,
+		startedAtEvent: {
+			transactionHash: transfer.transactionHash,
+		},
+		stoppedAtTimestamp: transfer.timestamp,
+		stoppedAtBlockNumber: transfer.blockNumber,
+		stoppedAtEvent: {
+			transactionHash: transfer.transactionHash,
+		},
 		totalAmountStreamed: transfer.value
 	}));
 
@@ -73,7 +77,10 @@ export async function getVirtualizedStreamPeriods(
 			fromUnixTime(endTimestamp),
 			period,
 			tokenPriceData?.prices || [],
-		);
+		).filter(x => {
+			// Possible fix for old entries showing up.
+			return x.startTime >= startTimestamp && x.endTime <= endTimestamp;
+		});
 
 		return mapStreamPeriodResult(streamPeriod, virtualPeriods);
 	});
