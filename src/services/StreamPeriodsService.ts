@@ -42,7 +42,9 @@ export async function getVirtualizedStreamPeriods(
 	);
 
 	const transfersAsStreamPeriods: StreamPeriodResult[] = transfers.map((transfer) => ({
-		...transfer,
+		__typename: "TransferEvent",
+		id: transfer.id,
+		token: transfer.token,
 		flowRate: "0",
 		chainId: transfer.chainId,
 		sender: transfer.from,
