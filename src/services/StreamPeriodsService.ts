@@ -317,7 +317,11 @@ function _mergeTransfersIntoStreamPeriods(
 
 		for (const streamPeriod of processedStreamPeriods) {
 
-			if (transfer.token.id !== streamPeriod.token.id || transfer.chainId !== streamPeriod.chainId) {
+			if (transfer.token.id !== streamPeriod.token.id || 
+				transfer.chainId !== streamPeriod.chainId ||
+				transfer.sender !== streamPeriod.sender ||
+				transfer.receiver !== streamPeriod.receiver
+			) {
 				continue;
 			}
 

@@ -337,14 +337,24 @@ const streamPeriodsQueryWithoutCounterparty = gql`
 		incomingTransfers: transferEvents(
 			first: $first, 
 			skip: $skip
-			where: { timestamp_lt: $to, timestamp_gte: $from, to_in: $addresses }
+			where: { 
+				timestamp_lt: $to, 
+				timestamp_gte: $from, 
+				to_in: $addresses,
+				from_not: "0x0000000000000000000000000000000000000000"
+			}
 		) {
 			...transferFields
 		}
 		outgoingTransfers: transferEvents(
 			first: $first, 
 			skip: $skip
-			where: { timestamp_lt: $to, timestamp_gte: $from, from_in: $addresses }
+			where: { 
+				timestamp_lt: $to, 
+				timestamp_gte: $from, 
+				from_in: $addresses,
+				to_not: "0x0000000000000000000000000000000000000000"
+			}
 		) {
 			...transferFields
 		}
