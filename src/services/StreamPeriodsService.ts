@@ -192,13 +192,10 @@ function virtulizeTransfer(
 	const isOutgoing = addresses.includes(transfer.sender.id.toLowerCase());
 	const amount = new Decimal(totalAmountStreamed);
 
-	const relevantPriceData = getPeriodRelevantPriceData(startedAtTimestamp, stoppedAtTimestamp, priceData);
-	const amountFiat = calculateVirtualStreamPeriodPrice(
-		startedAtTimestamp,
-		stoppedAtTimestamp + 1,
-		totalAmountStreamed,
-		[...relevantPriceData]
-	);
+	const timespanPrice = getPeriodRelevantPriceData(startedAtTimestamp, stoppedAtTimestamp, priceData)[0];
+
+	const amountEther = new Decimal(formatEther(totalAmountStreamed).toString());
+	const amountFiat = timespanPrice ? amountEther.mul(new Decimal(timespanPrice.price.toString())) : new Decimal(0);
 
 	const virtualStreamPeriod: VirtualStreamPeriod = {
 		startTime: startedAtTimestamp,
