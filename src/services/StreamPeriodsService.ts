@@ -7,7 +7,7 @@ import { CurrencyCode } from '../utils/CurrencyUtils';
 import { getEndOfPeriodTimestamp, UnitOfTime } from '../utils/DateUtils';
 import { Network } from '../utils/Network';
 import { queryStreamPeriods as queryStreamPeriodsAndTransfers } from '../utils/SubgraphApi';
-import { Address, StreamPeriod, StreamPeriodResult, Token, TransferEventResult, TransferEventResultWithToken, VirtualStreamPeriod } from '../utils/Types';
+import { Address, StreamPeriod, StreamPeriodResult, TransferEventResultWithToken, VirtualStreamPeriod } from '../utils/Types';
 import { getTokensPrices, NetworkToken } from './TokenPriceService';
 import maxBy from 'lodash/fp/maxBy';
 import { uniqBy } from 'lodash';
@@ -45,7 +45,7 @@ export async function getVirtualizedStreamPeriods(
 		__typename: "TransferEvent",
 		id: transfer.id,
 		token: transfer.token,
-		flowRate: "0",
+		flowRate: transfer.value,
 		chainId: transfer.chainId,
 		sender: transfer.from,
 		receiver: transfer.to,
@@ -54,7 +54,7 @@ export async function getVirtualizedStreamPeriods(
 		startedAtEvent: {
 			transactionHash: transfer.transactionHash,
 		},
-		stoppedAtTimestamp: transfer.timestamp,
+		stoppedAtTimestamp: transfer.timestamp + 1,
 		stoppedAtBlockNumber: transfer.blockNumber,
 		stoppedAtEvent: {
 			transactionHash: transfer.transactionHash,
@@ -62,7 +62,7 @@ export async function getVirtualizedStreamPeriods(
 		totalAmountStreamed: transfer.value
 	}));
 
-	const streamPeriodsAndTransfers = [...streamPeriods, ...transfersAsStreamPeriods];
+	const streamPeriodsAndTransfers = [...streamPeriods, ...transfersAsStreamPeriods]
 
 	// Map stream periods into virtualized periods based on conf
 	const virtualizedStreamPeriods = streamPeriodsAndTransfers.map((streamPeriod) => {
