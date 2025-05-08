@@ -54,7 +54,7 @@ export async function getVirtualizedStreamPeriods(
 		startedAtEvent: {
 			transactionHash: transfer.transactionHash,
 		},
-		stoppedAtTimestamp: transfer.timestamp + 1,
+		stoppedAtTimestamp: transfer.timestamp,
 		stoppedAtBlockNumber: transfer.blockNumber,
 		stoppedAtEvent: {
 			transactionHash: transfer.transactionHash,
@@ -62,16 +62,14 @@ export async function getVirtualizedStreamPeriods(
 		totalAmountStreamed: transfer.value
 	}));
 
-	const streamPeriodsAndTransfers = [...streamPeriods, ...transfersAsStreamPeriods]
-
 	// Map stream periods into virtualized periods based on conf
-	const virtualizedStreamPeriods = streamPeriodsAndTransfers.map((streamPeriod) => {
+	const virtualizedStreamPeriods = streamPeriods.map((streamPeriod) => {
 		const tokenPriceData = tokensWithPriceData.find(
 			(tokenWithPriceData) =>
 				tokenWithPriceData.chainId === streamPeriod.chainId &&
 				tokenWithPriceData.token.toLowerCase() === streamPeriod.token.underlyingAddress.toLowerCase(),
 		);
-
+		
 		const virtualPeriods = virtualizeStreamPeriod(
 			addresses,
 			streamPeriod,
@@ -87,7 +85,27 @@ export async function getVirtualizedStreamPeriods(
 		return mapStreamPeriodResult(streamPeriod, virtualPeriods);
 	});
 
-	return virtualizedStreamPeriods;
+	const virtualizedTransfers = transfersAsStreamPeriods.map((transfer) => {
+		const tokenPriceData = tokensWithPriceData.find(
+			(tokenWithPriceData) =>
+				tokenWithPriceData.chainId === transfer.chainId &&
+				tokenWithPriceData.token.toLowerCase() === transfer.token.underlyingAddress.toLowerCase(),
+		);
+		
+		const virtualPeriods = virtulizeTransfer(
+			addresses,
+			transfer,
+			tokenPriceData?.prices || [],
+		).filter(x => {
+			// Possible fix for old entries showing up.
+			return x.startTime >= startTimestamp && x.endTime <= endTimestamp;
+		});
+
+		return mapStreamPeriodResult(transfer, virtualPeriods);
+	});
+
+	return [...virtualizedStreamPeriods, ...virtualizedTransfers]
+		.sort(x => x.startedAtTimestamp)
 }
 
 function mapStreamPeriodResult(streamPeriod: StreamPeriodResult, virtualPeriods: VirtualStreamPeriod[]) {
@@ -162,6 +180,32 @@ function virtualizeStreamPeriod(
 		virtualStreamPeriod,
 		...virtualizeStreamPeriod(addresses, streamPeriod, nextPeriodStartDate, endDate, period, priceData),
 	];
+}
+
+function virtulizeTransfer(
+	addresses: Address[],
+	transfer: StreamPeriodResult,
+	priceData: TimespanPrice[],
+): Array<VirtualStreamPeriod> {
+	const { totalAmountStreamed, startedAtTimestamp, stoppedAtTimestamp } = transfer;
+
+	const isOutgoing = addresses.includes(transfer.sender.id.toLowerCase());
+	const amount = new Decimal(totalAmountStreamed);
+	const amountFiat = calculateVirtualStreamPeriodPrice(
+		startedAtTimestamp,
+		stoppedAtTimestamp + 1,
+		totalAmountStreamed,
+		priceData
+	);
+
+	const virtualStreamPeriod: VirtualStreamPeriod = {
+		startTime: startedAtTimestamp,
+		endTime: stoppedAtTimestamp,
+		amount: setDecimalSign(amount, isOutgoing).toFixed(),
+		amountFiat: setDecimalSign(amountFiat, isOutgoing).toFixed(),
+	};
+
+	return [virtualStreamPeriod]
 }
 
 function setDecimalSign(decimal: Decimal, negative: boolean) {
