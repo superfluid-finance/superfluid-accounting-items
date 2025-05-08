@@ -191,11 +191,13 @@ function virtulizeTransfer(
 
 	const isOutgoing = addresses.includes(transfer.sender.id.toLowerCase());
 	const amount = new Decimal(totalAmountStreamed);
+
+	const relevantPriceData = getPeriodRelevantPriceData(startedAtTimestamp, stoppedAtTimestamp, priceData);
 	const amountFiat = calculateVirtualStreamPeriodPrice(
 		startedAtTimestamp,
 		stoppedAtTimestamp + 1,
 		totalAmountStreamed,
-		priceData
+		[...relevantPriceData]
 	);
 
 	const virtualStreamPeriod: VirtualStreamPeriod = {
