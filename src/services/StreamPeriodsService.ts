@@ -77,10 +77,7 @@ export async function getVirtualizedStreamPeriods(
 			fromUnixTime(endTimestamp),
 			period,
 			tokenPriceData?.prices || [],
-		).filter(x => {
-			// Possible fix for old entries showing up.
-			return x.startTime >= startTimestamp && x.endTime <= endTimestamp;
-		});
+		)
 
 		return mapStreamPeriodResult(streamPeriod, virtualPeriods);
 	});
@@ -96,10 +93,7 @@ export async function getVirtualizedStreamPeriods(
 			addresses,
 			transfer,
 			tokenPriceData?.prices || [],
-		).filter(x => {
-			// Possible fix for old entries showing up.
-			return x.startTime >= startTimestamp && x.endTime <= endTimestamp;
-		});
+		)
 
 		return mapStreamPeriodResult(transfer, virtualPeriods);
 	});
@@ -110,7 +104,7 @@ export async function getVirtualizedStreamPeriods(
 	);
 
 	return [...processedStreamPeriods, ...unmergedTransfers]
-		.sort((a, b) => a.startedAtTimestamp - b.startedAtTimestamp);
+		.sort((a) => a.startedAtTimestamp);
 }
 
 function mapStreamPeriodResult(streamPeriod: StreamPeriodResult, virtualPeriods: VirtualStreamPeriod[]) {
@@ -173,8 +167,8 @@ function virtualizeStreamPeriod(
 	const virtualStreamPeriod: VirtualStreamPeriod = {
 		startTime: streamPeriodStartTimestamp,
 		endTime: streamPeriodEndTimestamp,
-		amount: setDecimalSign(amount, isOutgoing).toFixed(),
-		amountFiat: setDecimalSign(amountFiat, isOutgoing).toFixed(),
+		amount: setDecimalSign(amount, isOutgoing).toString(),
+		amountFiat: setDecimalSign(amountFiat, isOutgoing).toString(),
 	};
 
 	if (endTimestamp <= virtualPeriodEndTimestamp) return [virtualStreamPeriod];
@@ -205,8 +199,8 @@ function virtulizeTransfer(
 	const virtualStreamPeriod: VirtualStreamPeriod = {
 		startTime: startedAtTimestamp,
 		endTime: stoppedAtTimestamp,
-		amount: setDecimalSign(amount, isOutgoing).toFixed(),
-		amountFiat: setDecimalSign(amountFiat, isOutgoing).toFixed(),
+		amount: setDecimalSign(amount, isOutgoing).toString(),
+		amountFiat: setDecimalSign(amountFiat, isOutgoing).toString(),
 	};
 
 	return [virtualStreamPeriod]
@@ -290,7 +284,7 @@ function mapPriceDataToVirtualStreamPeriodRecursive(
 	const end = Math.min(nextTimespanPrice ? nextTimespanPrice.start : Infinity, endTimestamp);
 
 	const amountWei = new Decimal(end - start).mul(new Decimal(flowRate));
-	const amountEther = new Decimal(formatEther(amountWei.toFixed()).toString());
+	const amountEther = new Decimal(formatEther(amountWei.toString()).toString());
 	const amountFiat = amountEther.mul(new Decimal(timespanPrice.price.toString()));
 	const newTotal = currentTotal.add(amountFiat);
 
@@ -318,7 +312,7 @@ function _mergeTransfersIntoStreamPeriods(
 	const unmergedTransfers: StreamPeriod[] = [];
 
 	for (const transfer of virtualizedTransfers) {
-		const transferVirtualPeriod = transfer.virtualPeriods[0]; // Transfers have one virtual period
+		const transferVp = transfer.virtualPeriods[0]; // Transfers have one virtual period
 		let wasTransferMerged = false;
 
 		for (const streamPeriod of processedStreamPeriods) {
@@ -329,19 +323,19 @@ function _mergeTransfersIntoStreamPeriods(
 
 			for (const vp of streamPeriod.virtualPeriods) {
 				// Check if the transfer's timestamp falls within the virtual period's range
-				if (transferVirtualPeriod.startTime >= vp.startTime && transferVirtualPeriod.startTime <= vp.endTime) {
+				if (transferVp.startTime >= vp.startTime && transferVp.startTime <= vp.endTime) {
 					const currentVpAmount = new Decimal(vp.amount);
 					const currentVpAmountFiat = new Decimal(vp.amountFiat);
 					
-					const transferAmount = new Decimal(transferVirtualPeriod.amount);
-					const transferAmountFiat = new Decimal(transferVirtualPeriod.amountFiat);
+					const transferAmount = new Decimal(transferVp.amount);
+					const transferAmountFiat = new Decimal(transferVp.amountFiat);
 
-					vp.amount = currentVpAmount.add(transferAmount).toFixed();
-					vp.amountFiat = currentVpAmountFiat.add(transferAmountFiat).toFixed();
+					vp.amount = currentVpAmount.add(transferAmount).toString();
+					vp.amountFiat = currentVpAmountFiat.add(transferAmountFiat).toString();
 					
 					// Add to the parent stream period's totalAmountStreamed
 					const currentTotalAmountStreamed = new Decimal(streamPeriod.totalAmountStreamed);
-					streamPeriod.totalAmountStreamed = currentTotalAmountStreamed.add(transferAmount).toFixed();
+					streamPeriod.totalAmountStreamed = currentTotalAmountStreamed.add(transferAmount).toString();
 
 					wasTransferMerged = true;
 					break; // Transfer merged into this vp, stop checking other vps for this streamPeriod
