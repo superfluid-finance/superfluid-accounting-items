@@ -104,8 +104,13 @@ export async function getVirtualizedStreamPeriods(
 		return mapStreamPeriodResult(transfer, virtualPeriods);
 	});
 
-	return [...virtualizedStreamPeriods, ...virtualizedTransfers]
-		.sort(x => x.startedAtTimestamp)
+	const { processedStreamPeriods, unmergedTransfers } = _mergeTransfersIntoStreamPeriods(
+		virtualizedStreamPeriods,
+		virtualizedTransfers,
+	);
+
+	return [...processedStreamPeriods, ...unmergedTransfers]
+		.sort((a, b) => a.startedAtTimestamp - b.startedAtTimestamp);
 }
 
 function mapStreamPeriodResult(streamPeriod: StreamPeriodResult, virtualPeriods: VirtualStreamPeriod[]) {
@@ -298,4 +303,59 @@ function mapPriceDataToVirtualStreamPeriodRecursive(
 		endTimestamp,
 		remainingPriceData,
 	);
+}
+
+function _mergeTransfersIntoStreamPeriods(
+	virtualizedStreamPeriods: StreamPeriod[],
+	virtualizedTransfers: StreamPeriod[],
+): { processedStreamPeriods: StreamPeriod[]; unmergedTransfers: StreamPeriod[] } {
+	// Deep copy stream periods to avoid modifying the original array and its objects
+	const processedStreamPeriods = virtualizedStreamPeriods.map(sp => ({
+		...sp,
+		virtualPeriods: sp.virtualPeriods.map(vp => ({ ...vp })), 
+	}));
+	
+	const unmergedTransfers: StreamPeriod[] = [];
+
+	for (const transfer of virtualizedTransfers) {
+		const transferVirtualPeriod = transfer.virtualPeriods[0]; // Transfers have one virtual period
+		let wasTransferMerged = false;
+
+		for (const streamPeriod of processedStreamPeriods) {
+
+			if (transfer.token.id !== streamPeriod.token.id || transfer.chainId !== streamPeriod.chainId) {
+				continue;
+			}
+
+			for (const vp of streamPeriod.virtualPeriods) {
+				// Check if the transfer's timestamp falls within the virtual period's range
+				if (transferVirtualPeriod.startTime >= vp.startTime && transferVirtualPeriod.startTime <= vp.endTime) {
+					const currentVpAmount = new Decimal(vp.amount);
+					const currentVpAmountFiat = new Decimal(vp.amountFiat);
+					
+					const transferAmount = new Decimal(transferVirtualPeriod.amount);
+					const transferAmountFiat = new Decimal(transferVirtualPeriod.amountFiat);
+
+					vp.amount = currentVpAmount.add(transferAmount).toFixed();
+					vp.amountFiat = currentVpAmountFiat.add(transferAmountFiat).toFixed();
+					
+					// Add to the parent stream period's totalAmountStreamed
+					const currentTotalAmountStreamed = new Decimal(streamPeriod.totalAmountStreamed);
+					streamPeriod.totalAmountStreamed = currentTotalAmountStreamed.add(transferAmount).toFixed();
+
+					wasTransferMerged = true;
+					break; // Transfer merged into this vp, stop checking other vps for this streamPeriod
+				}
+			}
+
+			if (wasTransferMerged) {
+				break; // Transfer merged into a vp of this streamPeriod, move to the next transfer
+			}
+		}
+
+		if (!wasTransferMerged) {
+			unmergedTransfers.push(transfer);
+		}
+	}
+	return { processedStreamPeriods, unmergedTransfers };
 }
