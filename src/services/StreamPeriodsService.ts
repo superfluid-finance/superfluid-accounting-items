@@ -194,7 +194,7 @@ function virtulizeTransfer(
 	const timespanPrice = getPeriodRelevantPriceData(startedAtTimestamp, stoppedAtTimestamp, priceData)[0];
 
 	const amountEther = new Decimal(formatEther(totalAmountStreamed));
-	const amountFiat = timespanPrice ? amountEther.mul(new Decimal(timespanPrice.price.toString())) : new Decimal(0);
+	const amountFiat = timespanPrice ? amountEther.mul(new Decimal(timespanPrice.price?.toString() ?? "0")) : new Decimal(0);
 
 	const virtualStreamPeriod: VirtualStreamPeriod = {
 		startTime: startedAtTimestamp,
@@ -285,10 +285,10 @@ function mapPriceDataToVirtualStreamPeriodRecursive(
 
 	const amountWei = new Decimal(end - start).mul(new Decimal(flowRate));
 	const amountEther = new Decimal(formatEther(amountWei.toString()));
-	const amountFiat = amountEther.mul(new Decimal(timespanPrice.price.toString()));
+	const amountFiat = amountEther.mul(new Decimal(timespanPrice.price?.toString() ?? "0"));
 	const newTotal = currentTotal.add(amountFiat);
 
-	if (!nextTimespanPrice) return newTotal;
+	if (!nextTimespanPrice) return newTotal;	
 
 	return mapPriceDataToVirtualStreamPeriodRecursive(
 		newTotal,
