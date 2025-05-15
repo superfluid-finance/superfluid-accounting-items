@@ -45,7 +45,7 @@ export async function getVirtualizedStreamPeriods(
 		__typename: "TransferEvent",
 		id: transfer.id,
 		token: transfer.token,
-		flowRate: transfer.value,
+		flowRate: transfer.value ?? "0",
 		chainId: transfer.chainId,
 		sender: transfer.from,
 		receiver: transfer.to,
@@ -59,7 +59,7 @@ export async function getVirtualizedStreamPeriods(
 		stoppedAtEvent: {
 			transactionHash: transfer.transactionHash,
 		},
-		totalAmountStreamed: transfer.value
+		totalAmountStreamed: transfer.value ?? "0"
 	}));
 
 	// Map stream periods into virtualized periods based on conf
