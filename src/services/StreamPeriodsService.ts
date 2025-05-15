@@ -329,10 +329,10 @@ function _mergeTransfersIntoStreamPeriods(
 				// Check if the transfer's timestamp falls within the virtual period's range
 				if (transferVp.startTime >= vp.startTime && transferVp.startTime <= vp.endTime) {
 					const currentVpAmount = new Decimal(vp.amount);
-					const currentVpAmountFiat = new Decimal(vp.amountFiat);
+					const currentVpAmountFiat = vp.amountFiat ? new Decimal(vp.amountFiat) : new Decimal(0);
 					
 					const transferAmount = new Decimal(transferVp.amount);
-					const transferAmountFiat = new Decimal(transferVp.amountFiat);
+					const transferAmountFiat = transferVp.amountFiat ? new Decimal(transferVp.amountFiat) : new Decimal(0);
 
 					vp.amount = currentVpAmount.add(transferAmount).toFixed();
 					vp.amountFiat = currentVpAmountFiat.add(transferAmountFiat).toFixed(18);
